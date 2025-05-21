@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#4CAF50">
-  <title>MyNgenda - Fast & Reliable Package Delivery in Africa</title>
+  <title>Myngenda - Fast & Reliable Package Delivery in Africa</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="description" content="MyNgenda provides fast, reliable package delivery services across Africa. Track your deliveries in real-time and enjoy secure, efficient logistics solutions.">
+  <meta name="description" content="Myngenda provides fast, reliable package delivery services across Africa. Track your deliveries in real-time and enjoy secure, efficient logistics solutions.">
   
   <!-- Open Graph tags for better social sharing -->
-  <meta property="og:title" content="MyNgenda - Fast & Reliable Package Delivery">
+  <meta property="og:title" content="Myngenda - Fast & Reliable Package Delivery">
   <meta property="og:description" content="The most reliable package delivery service in Africa. Track deliveries in real-time.">
   <meta property="og:image" content="/images/cover-photo-with-logo.png">
   <meta property="og:url" content="https://myngenda.com">
@@ -172,6 +172,95 @@
       margin-bottom: 0.5rem;
     }
     
+    /* Testimonials Section */
+    .testimonials {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    
+    .testimonials h2 {
+      color: var(--primary-dark);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .testimonial-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .testimonial-card {
+      background: var(--card);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .testimonial-content {
+      flex-grow: 1;
+      margin-bottom: 1rem;
+    }
+    
+    .testimonial-content p {
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.6;
+      position: relative;
+    }
+    
+    .testimonial-content p::before,
+    .testimonial-content p::after {
+      content: '"';
+      color: var(--primary-light);
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      margin-top: auto;
+    }
+    
+    .testimonial-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 1rem;
+    }
+    
+    .testimonial-info {
+      text-align: left;
+    }
+    
+    .testimonial-info h4 {
+      margin: 0;
+      color: var(--text);
+    }
+    
+    .testimonial-info p {
+      margin: 0;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+    
+    /* CTA Section */
     .cta-section {
       background: var(--primary-light);
       padding: 3rem 2rem;
@@ -232,18 +321,28 @@
 </head>
 <body>
   <header>
-    <h1>MyNgenda</h1>
+    <h1>Myngenda</h1>
     <p>Fast & Reliable Package Delivery</p>
   </header>
   
   <div class="container">
     <section class="hero">
-      <h1>Africa's Most Reliable Delivery Service</h1>
-      <p>MyNgenda offers fast, secure, and affordable package delivery services across Africa. Track your deliveries in real-time and enjoy our user-friendly mobile app.</p>
-      
-      <div class="btn-group">
-        <a href="/register-fix.html" class="btn btn-large">Register Now</a>
-        <a href="/token-auth-test.html" class="btn btn-large btn-outline">Login</a>
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2rem; width: 100%; max-width: 1200px;">
+          <div style="flex: 1; min-width: 300px;">
+            <h1>Africa's Most Reliable Delivery Service</h1>
+            <p>Myngenda delivers your packages across Africa with speed, security, and real-time tracking. Our professional delivery agents ensure your packages arrive safely and on time.</p>
+            
+            <div class="btn-group">
+              <a href="/register-fix.html" class="btn btn-large">Register Now</a>
+              <a href="/token-auth-test.html" class="btn btn-large btn-outline">Login</a>
+            </div>
+          </div>
+          
+          <div style="flex: 1; min-width: 300px; text-align: center;">
+            <img src="/delivery-rider.png" alt="Myngenda delivery agent with branded box" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          </div>
+        </div>
       </div>
     </section>
     
@@ -285,9 +384,53 @@
       </div>
     </section>
     
+    <section class="testimonials">
+      <h2>What Our Customers Say</h2>
+      <div class="testimonial-container">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"Myngenda has completely changed how we handle deliveries. Their tracking system is excellent and the drivers are always professional."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">JO</div>
+            <div class="testimonial-info">
+              <h4>John Okafor</h4>
+              <p>Business Owner</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"I've tried many delivery services, but Myngenda stands out for reliability. My packages always arrive on time and in perfect condition."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">CA</div>
+            <div class="testimonial-info">
+              <h4>Chinwe Adebayo</h4>
+              <p>Regular Customer</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"The mobile app is so easy to use. I can track my deliveries in real-time and communicate directly with the driver. Highly recommended!"</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">DM</div>
+            <div class="testimonial-info">
+              <h4>Daniel Mensah</h4>
+              <p>E-commerce Seller</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
     <section class="cta-section">
       <h2>Ready to experience hassle-free deliveries?</h2>
-      <p>Join thousands of satisfied customers who trust MyNgenda for their delivery needs.</p>
+      <p>Join thousands of satisfied customers who trust Myngenda for their delivery needs.</p>
       <div class="btn-group">
         <a href="/register-fix.html" class="btn btn-accent">Sign Up Now</a>
         <a href="/pwa-test.html" class="btn btn-outline">Try Demo</a>
@@ -303,7 +446,7 @@
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Service</a>
     </div>
-    <p>&copy; 2025 MyNgenda. All rights reserved.</p>
+    <p>&copy; 2025 Myngenda. All rights reserved.</p>
   </footer>
   
   <script>
