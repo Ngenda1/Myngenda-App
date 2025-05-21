@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4CAF50">
+  <title>MyNgenda PWA Feature Tester</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --primary-light: #A5D6A7;
+      --accent: #F57C00;
+      --text: #212121;
+      --text-light: #757575;
+      --background: #f5f5f5;
+      --card: #ffffff;
+      --border: #DDDDDD;
+      --error: #F44336;
+      --success: #4CAF50;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    .card {
+      background: var(--card);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    h1, h2, h3 {
+      color: var(--primary);
+    }
+    
+    h2 {
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 0.5rem;
+      margin-top: 0;
+    }
+    
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-warning {
+      background-color: var(--accent);
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    .status {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    
+    .status-success {
+      background-color: #E8F5E9;
+      border-left: 4px solid var(--success);
+    }
+    
+    .status-error {
+      background-color: #FFEBEE;
+      border-left: 4px solid var(--error);
+    }
+    
+    .status-info {
+      background-color: #E3F2FD;
+      border-left: 4px solid #2196F3;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .feature-item {
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab.active {
+      border-bottom-color: var(--primary);
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      padding: 1rem;
+    }
+    
+    @media (max-width: 600px) {
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MyNgenda PWA Feature Tester</h1>
+    <p>Test all the features of the MyNgenda Progressive Web App</p>
+  </header>
+  
+  <div class="container">
+    <div class="status status-info">
+      <h3>🚀 Ready for Deployment</h3>
+      <p>This page allows you to validate that all PWA features are working properly before deployment.</p>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="pwa-features">PWA Features</div>
+      <div class="tab" data-tab="auth-test">Authentication</div>
+      <div class="tab" data-tab="offline-test">Offline Support</div>
+      <div class="tab" data-tab="deployment">Deployment</div>
+    </div>
+    
+    <div class="tab-content active" id="pwa-features">
+      <div class="card">
+        <h2>Progressive Web App Features</h2>
+        <p>MyNgenda includes all standard PWA features to provide a native-like experience for users:</p>
+        
+        <div class="feature-grid">
+          <div class="feature-item">
+            <div class="feature-icon">📲</div>
+            <div>Installable</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔌</div>
+            <div>Offline Support</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔒</div>
+            <div>Secure Auth</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔔</div>
+            <div>Push Notifications</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔄</div>
+            <div>Background Sync</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📱</div>
+            <div>Responsive Design</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+          <button class="btn" id="install-btn">Install App</button>
+          <button class="btn btn-outline" id="check-features-btn">Check PWA Status</button>
+        </div>
+        
+        <div id="pwa-status" style="margin-top: 1rem; display: none;"></div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="auth-test">
+      <div class="card">
+        <h2>Authentication System Test</h2>
+        <p>Test the token-based authentication system that works for both internal and external users:</p>
+        
+        <div class="form-group">
+          <label for="auth-email">Email</label>
+          <input type="email" id="auth-email" placeholder="Enter your email" value="test@example.com">
+        </div>
+        
+        <div class="form-group">
+          <label for="auth-password">Password</label>
+          <input type="password" id="auth-password" placeholder="Enter your password" value="password123">
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+          <button class="btn" id="register-btn">Register</button>
+          <button class="btn" id="login-btn">Login</button>
+          <button class="btn btn-outline" id="check-auth-btn">Check Auth</button>
+        </div>
+        
+        <div id="auth-status" style="margin-top: 1rem; display: none;"></div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="offline-test">
+      <div class="card">
+        <h2>Offline Support Test</h2>
+        <p>Test the app's behavior when offline and verify that cached content is accessible:</p>
+        
+        <div style="margin-bottom: 1rem;">
+          <button class="btn" id="cache-content-btn">Cache Current Content</button>
+          <button class="btn btn-warning" id="simulate-offline-btn">Simulate Offline</button>
+          <button class="btn btn-outline" id="check-connectivity-btn">Check Connectivity</button>
+        </div>
+        
+        <div class="status status-info">
+          <p><strong>How to test offline mode:</strong></p>
+          <ol>
+            <li>Click "Cache Current Content" to ensure data is stored</li>
+            <li>Click "Simulate Offline" or use DevTools to go offline</li>
+            <li>Try accessing different pages of the app</li>
+            <li>Verify that cached content is displayed properly</li>
+          </ol>
+        </div>
+        
+        <div id="offline-status" style="margin-top: 1rem; display: none;"></div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="deployment">
+      <div class="card">
+        <h2>Deployment Checklist</h2>
+        <p>Ensure all these items are verified before deploying the application:</p>
+        
+        <div style="margin-bottom: 1rem;">
+          <div class="form-group">
+            <input type="checkbox" id="check-pwa" checked>
+            <label for="check-pwa" style="display: inline;">PWA features validated</label>
+          </div>
+          
+          <div class="form-group">
+            <input type="checkbox" id="check-auth" checked>
+            <label for="check-auth" style="display: inline;">Authentication system working</label>
+          </div>
+          
+          <div class="form-group">
+            <input type="checkbox" id="check-offline" checked>
+            <label for="check-offline" style="display: inline;">Offline support verified</label>
+          </div>
+          
+          <div class="form-group">
+            <input type="checkbox" id="check-https" checked>
+            <label for="check-https" style="display: inline;">HTTPS enabled</label>
+          </div>
+          
+          <div class="form-group">
+            <input type="checkbox" id="check-manifest" checked>
+            <label for="check-manifest" style="display: inline;">Web Manifest properly configured</label>
+          </div>
+          
+          <div class="form-group">
+            <input type="checkbox" id="check-sw" checked>
+            <label for="check-sw" style="display: inline;">Service Worker registered</label>
+          </div>
+        </div>
+        
+        <button class="btn" id="validate-deployment-btn">Validate Deployment Readiness</button>
+        
+        <div id="deployment-status" style="margin-top: 1rem; display: none;"></div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    MyNgenda PWA Test Page &copy; 2025
+  </footer>
+  
+  <script>
+    // Tab switching functionality
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => {
+          t.classList.remove('active');
+        });
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Hide all tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        
+        // Show relevant tab content
+        const tabId = tab.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+    
+    // PWA features check
+    document.getElementById('check-features-btn').addEventListener('click', async () => {
+      const statusElement = document.getElementById('pwa-status');
+      statusElement.style.display = 'block';
+      
+      // Check various PWA features
+      const features = [];
+      
+      // Check service worker
+      if ('serviceWorker' in navigator) {
+        features.push('✅ Service Worker supported');
+        
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            features.push('✅ Service Worker registered');
+          } else {
+            features.push('❌ Service Worker not registered');
+          }
+        } catch (error) {
+          features.push(`❌ Service Worker registration error: ${error.message}`);
+        }
+      } else {
+        features.push('❌ Service Worker not supported');
+      }
+      
+      // Check for installability
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        features.push('✅ App is installed');
+      } else if ('BeforeInstallPromptEvent' in window) {
+        features.push('✅ App is installable');
+      } else {
+        features.push('❌ App installation not available');
+      }
+      
+      // Check for manifest
+      const links = document.querySelectorAll('link[rel="manifest"]');
+      if (links.length > 0) {
+        features.push('✅ Web App Manifest linked');
+        
+        try {
+          const manifestResponse = await fetch(links[0].href);
+          if (manifestResponse.ok) {
+            const manifest = await manifestResponse.json();
+            if (manifest.icons && manifest.icons.length > 0) {
+              features.push('✅ Manifest has icons');
+            } else {
+              features.push('❌ Manifest missing icons');
+            }
+          } else {
+            features.push('❌ Manifest could not be loaded');
+          }
+        } catch (error) {
+          features.push(`❌ Error loading manifest: ${error.message}`);
+        }
+      } else {
+        features.push('❌ No Web App Manifest found');
+      }
+      
+      // Check for push notifications
+      if ('Notification' in window) {
+        features.push('✅ Push Notifications supported');
+        
+        if (Notification.permission === 'granted') {
+          features.push('✅ Notification permission granted');
+        } else if (Notification.permission === 'denied') {
+          features.push('❌ Notification permission denied');
+        } else {
+          features.push('⚠️ Notification permission not requested');
+        }
+      } else {
+        features.push('❌ Push Notifications not supported');
+      }
+      
+      // Check for IndexedDB (for offline storage)
+      if ('indexedDB' in window) {
+        features.push('✅ IndexedDB supported (for offline data)');
+      } else {
+        features.push('❌ IndexedDB not supported');
+      }
+      
+      // Display results
+      statusElement.innerHTML = `
+        <div class="status ${features.some(f => f.includes('❌')) ? 'status-error' : 'status-success'}">
+          <h3>PWA Feature Check Results</h3>
+          <ul>
+            ${features.map(feature => `<li>${feature}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    });
+    
+    // Install button
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent Chrome 67+ from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+      
+      // Update UI to show the install button
+      const installBtn = document.getElementById('install-btn');
+      installBtn.style.display = 'inline-block';
+    });
+    
+    document.getElementById('install-btn').addEventListener('click', async () => {
+      if (!deferredPrompt) {
+        // The deferred prompt isn't available
+        const statusElement = document.getElementById('pwa-status');
+        statusElement.style.display = 'block';
+        statusElement.innerHTML = `
+          <div class="status status-info">
+            <p>The app can't be installed right now. Possible reasons:</p>
+            <ul>
+              <li>The app is already installed</li>
+              <li>The browser doesn't support installation</li>
+              <li>The necessary PWA criteria aren't met</li>
+            </ul>
+            <p>Try using Chrome or Edge on desktop or Android for best results.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Show the prompt
+      deferredPrompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      // We've used the prompt, and can't use it again, throw it away
+      deferredPrompt = null;
+      
+      // Log the outcome
+      const statusElement = document.getElementById('pwa-status');
+      statusElement.style.display = 'block';
+      
+      if (outcome === 'accepted') {
+        statusElement.innerHTML = `
+          <div class="status status-success">
+            <p>🎉 App installation accepted! The app will be installed on your device.</p>
+          </div>
+        `;
+      } else {
+        statusElement.innerHTML = `
+          <div class="status status-info">
+            <p>App installation was declined. You can try again later.</p>
+          </div>
+        `;
+      }
+    });
+    
+    // Authentication tests
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const statusElement = document.getElementById('auth-status');
+      
+      if (!email || !password) {
+        statusElement.style.display = 'block';
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <p>Please enter both email and password.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      statusElement.style.display = 'block';
+      statusElement.innerHTML = `
+        <div class="status status-info">
+          <p>Attempting to register...</p>
+        </div>
+      `;
+      
+      try {
+        const response = await fetch('/api/token/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            firstName: 'Test',
+            lastName: 'User',
+            email,
+            password,
+            phoneNumber: '123456789',
+            role: 'user'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Store the token
+          if (data.token) {
+            localStorage.setItem('auth_token', data.token);
+          }
+          
+          statusElement.innerHTML = `
+            <div class="status status-success">
+              <h3>Registration Successful!</h3>
+              <p>${data.message || 'Your account has been created.'}</p>
+              ${data.token ? '<p>Token has been stored locally.</p>' : ''}
+            </div>
+          `;
+        } else {
+          statusElement.innerHTML = `
+            <div class="status status-error">
+              <h3>Registration Failed</h3>
+              <p>${data.message || 'Unknown error occurred.'}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <h3>Connection Error</h3>
+            <p>Could not connect to the server: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+    
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const statusElement = document.getElementById('auth-status');
+      
+      if (!email || !password) {
+        statusElement.style.display = 'block';
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <p>Please enter both email and password.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      statusElement.style.display = 'block';
+      statusElement.innerHTML = `
+        <div class="status status-info">
+          <p>Attempting to login...</p>
+        </div>
+      `;
+      
+      try {
+        const response = await fetch('/api/token/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email,
+            password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Store the token
+          if (data.token) {
+            localStorage.setItem('auth_token', data.token);
+          }
+          
+          statusElement.innerHTML = `
+            <div class="status status-success">
+              <h3>Login Successful!</h3>
+              <p>${data.message || 'You are now logged in.'}</p>
+              ${data.token ? '<p>Token has been stored locally.</p>' : ''}
+              <p><strong>User:</strong> ${data.user ? JSON.stringify(data.user) : 'User data not available'}</p>
+            </div>
+          `;
+        } else {
+          statusElement.innerHTML = `
+            <div class="status status-error">
+              <h3>Login Failed</h3>
+              <p>${data.message || 'Unknown error occurred.'}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <h3>Connection Error</h3>
+            <p>Could not connect to the server: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+    
+    document.getElementById('check-auth-btn').addEventListener('click', async () => {
+      const statusElement = document.getElementById('auth-status');
+      statusElement.style.display = 'block';
+      
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <h3>Not Authenticated</h3>
+            <p>No authentication token found. Please login first.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      statusElement.innerHTML = `
+        <div class="status status-info">
+          <p>Verifying authentication...</p>
+        </div>
+      `;
+      
+      try {
+        const response = await fetch('/api/token/current-user', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          statusElement.innerHTML = `
+            <div class="status status-success">
+              <h3>Authenticated!</h3>
+              <p>${data.message || 'Your token is valid.'}</p>
+              <p><strong>User:</strong> ${data.user ? JSON.stringify(data.user) : 'User data not available'}</p>
+            </div>
+          `;
+        } else {
+          // Token is invalid, remove it
+          localStorage.removeItem('auth_token');
+          
+          statusElement.innerHTML = `
+            <div class="status status-error">
+              <h3>Authentication Failed</h3>
+              <p>${data.message || 'Invalid or expired token.'}</p>
+              <p>Token has been removed from storage.</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <h3>Connection Error</h3>
+            <p>Could not connect to the server: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+    
+    // Offline testing
+    document.getElementById('cache-content-btn').addEventListener('click', () => {
+      const statusElement = document.getElementById('offline-status');
+      statusElement.style.display = 'block';
+      
+      // Try to cache the current page
+      if ('caches' in window) {
+        caches.open('myngenda-test-cache').then(cache => {
+          // Cache current page and some key resources
+          const urlsToCache = [
+            window.location.href,
+            '/manifest.json',
+            '/icons/myngenda-icon.png'
+          ];
+          
+          Promise.all(urlsToCache.map(url => {
+            return fetch(url).then(response => {
+              if (response.ok) {
+                return cache.put(url, response);
+              }
+            });
+          }))
+          .then(() => {
+            statusElement.innerHTML = `
+              <div class="status status-success">
+                <h3>Content Cached</h3>
+                <p>Current page and resources have been cached for offline use.</p>
+              </div>
+            `;
+          })
+          .catch(error => {
+            statusElement.innerHTML = `
+              <div class="status status-error">
+                <h3>Caching Failed</h3>
+                <p>Error caching content: ${error.message}</p>
+              </div>
+            `;
+          });
+        });
+      } else {
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <h3>Cache API Not Supported</h3>
+            <p>Your browser doesn't support the Cache API required for offline functionality.</p>
+          </div>
+        `;
+      }
+    });
+    
+    document.getElementById('simulate-offline-btn').addEventListener('click', () => {
+      const statusElement = document.getElementById('offline-status');
+      statusElement.style.display = 'block';
+      
+      statusElement.innerHTML = `
+        <div class="status status-info">
+          <h3>Offline Simulation</h3>
+          <p>To simulate offline mode:</p>
+          <ol>
+            <li>Open DevTools (F12 or Ctrl+Shift+I)</li>
+            <li>Go to the Network tab</li>
+            <li>Check the "Offline" checkbox</li>
+            <li>Try navigating to different pages</li>
+          </ol>
+          <p>You should see cached content and the offline page for uncached resources.</p>
+        </div>
+      `;
+    });
+    
+    document.getElementById('check-connectivity-btn').addEventListener('click', () => {
+      const statusElement = document.getElementById('offline-status');
+      statusElement.style.display = 'block';
+      
+      if (navigator.onLine) {
+        statusElement.innerHTML = `
+          <div class="status status-success">
+            <h3>Online</h3>
+            <p>You are currently online. To test offline functionality, use the "Simulate Offline" button.</p>
+          </div>
+        `;
+      } else {
+        statusElement.innerHTML = `
+          <div class="status status-error">
+            <h3>Offline</h3>
+            <p>You are currently offline. Any content you see is being served from the cache.</p>
+          </div>
+        `;
+      }
+    });
+    
+    // Listen for online/offline events
+    window.addEventListener('online', () => {
+      const statusElement = document.getElementById('offline-status');
+      if (statusElement.style.display === 'block') {
+        statusElement.innerHTML = `
+          <div class="status status-success">
+            <h3>Connection Restored</h3>
+            <p>You are now online.</p>
+          </div>
+        `;
+      }
+    });
+    
+    window.addEventListener('offline', () => {
+      const statusElement = document.getElementById('offline-status');
+      statusElement.style.display = 'block';
+      statusElement.innerHTML = `
+        <div class="status status-error">
+          <h3>Connection Lost</h3>
+          <p>You are now offline. Content is being served from cache.</p>
+        </div>
+      `;
+    });
+    
+    // Deployment readiness check
+    document.getElementById('validate-deployment-btn').addEventListener('click', async () => {
+      const statusElement = document.getElementById('deployment-status');
+      statusElement.style.display = 'block';
+      
+      const checks = [];
+      let allPassed = true;
+      
+      // Check if running on HTTPS
+      if (window.location.protocol === 'https:') {
+        checks.push('✅ Running on HTTPS');
+      } else {
+        checks.push('⚠️ Not running on HTTPS (required for production)');
+        allPassed = false;
+      }
+      
+      // Check service worker
+      if ('serviceWorker' in navigator) {
+        checks.push('✅ Service Worker API supported');
+        
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            checks.push('✅ Service Worker registered');
+          } else {
+            checks.push('❌ Service Worker not registered');
+            allPassed = false;
+          }
+        } catch (error) {
+          checks.push(`❌ Service Worker error: ${error.message}`);
+          allPassed = false;
+        }
+      } else {
+        checks.push('❌ Service Worker not supported');
+        allPassed = false;
+      }
+      
+      // Check manifest
+      const links = document.querySelectorAll('link[rel="manifest"]');
+      if (links.length > 0) {
+        checks.push('✅ Web App Manifest linked');
+        
+        try {
+          const manifestResponse = await fetch(links[0].href);
+          if (manifestResponse.ok) {
+            const manifest = await manifestResponse.json();
+            
+            // Check for minimal manifest requirements
+            const requiredProperties = ['name', 'short_name', 'start_url', 'display', 'icons'];
+            const missingProperties = requiredProperties.filter(prop => !manifest[prop]);
+            
+            if (missingProperties.length === 0) {
+              checks.push('✅ Manifest contains all required properties');
+            } else {
+              checks.push(`❌ Manifest missing properties: ${missingProperties.join(', ')}`);
+              allPassed = false;
+            }
+            
+            // Check icons
+            if (manifest.icons && manifest.icons.length > 0) {
+              const requiredSizes = ['192x192', '512x512'];
+              const hasRequiredSizes = requiredSizes.every(size => 
+                manifest.icons.some(icon => icon.sizes === size)
+              );
+              
+              if (hasRequiredSizes) {
+                checks.push('✅ Manifest has required icon sizes');
+              } else {
+                checks.push('❌ Manifest missing required icon sizes (192x192, 512x512)');
+                allPassed = false;
+              }
+            } else {
+              checks.push('❌ Manifest has no icons');
+              allPassed = false;
+            }
+          } else {
+            checks.push('❌ Manifest could not be loaded');
+            allPassed = false;
+          }
+        } catch (error) {
+          checks.push(`❌ Error loading manifest: ${error.message}`);
+          allPassed = false;
+        }
+      } else {
+        checks.push('❌ No Web App Manifest found');
+        allPassed = false;
+      }
+      
+      // Check authentication token-based system
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        checks.push('✅ Auth token found in storage');
+        
+        try {
+          const response = await fetch('/api/token/current-user', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            checks.push('✅ Token authentication working');
+          } else {
+            checks.push('❌ Token authentication not working correctly');
+            allPassed = false;
+          }
+        } catch (error) {
+          checks.push(`❌ Error checking authentication: ${error.message}`);
+          allPassed = false;
+        }
+      } else {
+        checks.push('⚠️ No auth token found (login to test authentication)');
+      }
+      
+      // Check connectivity
+      if (navigator.onLine) {
+        checks.push('✅ App is online');
+      } else {
+        checks.push('⚠️ App is offline (this is expected if testing offline mode)');
+      }
+      
+      // Display results
+      statusElement.innerHTML = `
+        <div class="status ${allPassed ? 'status-success' : 'status-error'}">
+          <h3>Deployment Readiness Check</h3>
+          <ul>
+            ${checks.map(check => `<li>${check}</li>`).join('')}
+          </ul>
+          <p><strong>Verdict:</strong> ${
+            allPassed 
+              ? '✅ App is ready for deployment!' 
+              : '⚠️ Some issues need to be addressed before deployment.'
+          }</p>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
