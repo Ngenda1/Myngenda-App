@@ -4,5 +4,5 @@
 
 [[redirects]]
   from = "/*"
-  to = "/pwa-test.html"
+  to = "/index.html"
   status = 200
