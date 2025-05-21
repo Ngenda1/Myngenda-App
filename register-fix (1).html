@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Myngenda - Registration</title>
+  <link rel="icon" href="/icons/myngenda-icon.png">
+  <meta name="theme-color" content="#4CAF50">
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --primary-light: #A5D6A7;
+      --accent: #2196F3;
+      --accent-dark: #1976D2;
+      --text: #212121;
+      --text-light: #757575;
+      --background: #f5f5f5;
+      --card: #ffffff;
+      --border: #DDDDDD;
+      --error: #F44336;
+      --success: #4CAF50;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      background-color: var(--background);
+      color: var(--text);
+    }
+    
+    h1, h2 {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+    
+    .button {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-align: center;
+    }
+    
+    .button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+    
+    .button:active {
+      transform: translateY(1px);
+    }
+    
+    .alert {
+      padding: 16px;
+      margin-bottom: 24px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    input:focus, select:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .success-message {
+      color: #155724;
+      background-color: #d4edda;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+    
+    .error-message {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-left: 4px solid var(--error);
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+    
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    
+    a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div style="display: flex; align-items: center; margin-bottom: 20px;">
+    <img src="/icons/myngenda-icon.png" alt="Myngenda logo" style="height: 60px; margin-right: 15px;">
+    <h1>Myngenda - Create Account</h1>
+  </div>
+  
+  <div class="alert" style="background-color: #e7f3ff; border-left: 4px solid #2196F3;">
+    <p><strong>Welcome!</strong> Join Myngenda today to access fast, reliable delivery services across Africa.</p>
+  </div>
+  
+  <div class="card">
+    <h2>Create Account</h2>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="accountType">Account Type</label>
+        <select id="accountType" required>
+          <option value="user">Customer (Request deliveries)</option>
+          <option value="driver">Driver (Make deliveries)</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number</label>
+        <input type="text" id="phoneNumber" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required minlength="6">
+        <small>Password must be at least 6 characters</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" required minlength="6">
+      </div>
+      
+      <div class="form-group">
+        <input type="checkbox" id="termsAgreement" required>
+        <label for="termsAgreement" style="display:inline">I agree to the Terms of Service and Privacy Policy</label>
+      </div>
+      
+      <button type="submit" class="button">Create Account</button>
+    </form>
+    
+    <div id="successMessage" class="success-message hidden">
+      <h3>Registration Successful!</h3>
+      <p>Your account has been created successfully.</p>
+      <p>You will be redirected to the login page in a few seconds...</p>
+    </div>
+    
+    <div id="errorMessage" class="error-message hidden"></div>
+  </div>
+  
+  <div class="card">
+    <h2>Already have an account?</h2>
+    <a href="/token-auth-test.html" class="button">Sign In</a>
+  </div>
+  
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      
+      // Hide any existing messages
+      document.getElementById('successMessage').classList.add('hidden');
+      document.getElementById('errorMessage').classList.add('hidden');
+      
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = 'Passwords do not match';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+      
+      // Prepare form data
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+        password: password,
+        role: document.getElementById('accountType').value
+      };
+      
+      try {
+        // Use token-based registration for external users
+        const response = await fetch('/api/token/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Show success message
+          document.getElementById('successMessage').classList.remove('hidden');
+          document.getElementById('registerForm').reset();
+          
+          // Store token in localStorage
+          if (result.token) {
+            localStorage.setItem('auth_token', result.token);
+          }
+          
+          // Redirect to login/dashboard after 3 seconds
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        } else {
+          // Show error message
+          const errorMessage = document.getElementById('errorMessage');
+          errorMessage.textContent = result.message || 'Registration failed';
+          errorMessage.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        
+        // Show error message
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = 'Error connecting to server. Please try again later.';
+        errorMessage.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
