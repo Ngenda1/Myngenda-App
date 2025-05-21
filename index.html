@@ -105,69 +105,64 @@
     }
     
     .hero {
+      position: relative;
+      height: 90vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      text-align: center;
-      padding: 5rem 1rem;
-      background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8)), url('/images/myngenda-background.png');
+      justify-content: center;
+      margin-bottom: 3rem;
+      background: url('/images/myngenda-hero.png');
       background-size: cover;
       background-position: center;
-      border-radius: 12px;
-      margin-bottom: 3rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
     
-    .hero h1 {
-      color: var(--text);
-      font-size: 3rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      line-height: 1.2;
-    }
-    
-    .hero h1 span {
-      color: var(--primary);
-    }
-    
-    .hero p {
-      color: var(--text-light);
-      font-size: 1.25rem;
-      max-width: 800px;
-      margin-bottom: 2.5rem;
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .hero-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-      width: 100%;
-      max-width: 1000px;
+      text-align: center;
+      color: white;
+      padding: 2rem;
+      max-width: 800px;
+      z-index: 2;
     }
     
-    .hero-image {
-      margin-bottom: 2rem;
+    .hero-title {
+      font-size: 5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      color: white;
     }
     
-    .hero-image img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    .hero-subtitle {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #FF9800;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
     
-    .bounce-animation {
-      animation: bounce 2s infinite;
-    }
-    
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
+    .hero-tagline {
+      font-size: 1.8rem;
+      font-weight: 500;
+      margin-bottom: 3rem;
+      color: white;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
     
     .hero-actions {
@@ -177,11 +172,62 @@
       width: 100%;
     }
     
-    .hero-note {
-      margin-top: 1rem;
-      font-size: 1rem;
-      color: var(--text-light);
-      font-style: italic;
+    .btn-group {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .hero .btn {
+      font-size: 1.2rem;
+      padding: 1rem 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+    
+    .hero .btn-large {
+      background-color: #4CAF50;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    .hero .btn-outline {
+      background-color: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+    
+    .hero .btn-large:hover {
+      background-color: #388E3C;
+      transform: translateY(-3px);
+    }
+    
+    .hero .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 3.5rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 2rem;
+      }
+      
+      .hero-tagline {
+        font-size: 1.5rem;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .hero .btn {
+        width: 100%;
+      }
     }
     
     .btn-group {
@@ -594,7 +640,6 @@
       <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#testimonials">Testimonials</a>
-        <a href="#pricing">Pricing</a>
         <a href="/register-fix.html">Register</a>
         <a href="/token-auth-test.html">Login</a>
       </div>
@@ -603,20 +648,18 @@
   
   <div class="container">
     <section class="hero">
-      <h1>Africa's <span>Most Reliable</span><br>Delivery Service</h1>
-      <p>Myngenda delivers your packages across Africa with speed, security, and real-time tracking. Our professional delivery agents ensure your packages arrive safely and on time.</p>
-      
-      <div class="hero-content">
-        <div class="hero-image">
-          <img src="/delivery-rider.png" alt="Myngenda delivery agent with branded box" class="bounce-animation">
-        </div>
-        
-        <div class="hero-actions">
-          <div class="btn-group">
-            <a href="/register-fix.html" class="btn btn-large">Get Started</a>
-            <a href="/token-auth-test.html" class="btn btn-large btn-outline">Sign In</a>
+      <div class="hero-overlay">
+        <div class="hero-content">
+          <h1 class="hero-title">Myngenda</h1>
+          <h2 class="hero-subtitle">Delivery Services</h2>
+          <p class="hero-tagline">Where Speed Meets Trust</p>
+          
+          <div class="hero-actions">
+            <div class="btn-group">
+              <a href="/register-fix.html" class="btn btn-large">Register</a>
+              <a href="/token-auth-test.html" class="btn btn-large btn-outline">Login</a>
+            </div>
           </div>
-          <p class="hero-note">Join thousands of satisfied customers across Africa</p>
         </div>
       </div>
     </section>
@@ -713,76 +756,7 @@
       </div>
     </section>
     
-    <section id="pricing" class="pricing section-container">
-      <div class="section-header">
-        <h2>Simple, Transparent <span>Pricing</span></h2>
-        <p>Affordable rates for all your delivery needs</p>
-      </div>
-      
-      <div class="pricing-container">
-        <div class="pricing-card">
-          <div class="pricing-header">
-            <h3>Small Package</h3>
-            <p class="package-description">Up to 5 lbs</p>
-            <div class="price">
-              <span class="amount">$5</span>
-              <span class="period">+ $0.75/mile</span>
-            </div>
-          </div>
-          <ul class="pricing-features">
-            <li>Real-time tracking</li>
-            <li>Insurance up to $100</li>
-            <li>Same-day delivery (local)</li>
-            <li>Mobile notifications</li>
-          </ul>
-          <a href="/register-fix.html" class="btn">Get Started</a>
-        </div>
-        
-        <div class="pricing-card featured">
-          <div class="popular-tag">Most Popular</div>
-          <div class="pricing-header">
-            <h3>Medium Package</h3>
-            <p class="package-description">5-15 lbs</p>
-            <div class="price">
-              <span class="amount">$8</span>
-              <span class="period">+ $1.00/mile</span>
-            </div>
-          </div>
-          <ul class="pricing-features">
-            <li>Real-time tracking</li>
-            <li>Insurance up to $250</li>
-            <li>Same-day delivery (local)</li>
-            <li>Mobile notifications</li>
-            <li>Priority handling</li>
-          </ul>
-          <a href="/register-fix.html" class="btn btn-accent">Get Started</a>
-        </div>
-        
-        <div class="pricing-card">
-          <div class="pricing-header">
-            <h3>Large Package</h3>
-            <p class="package-description">15-30 lbs</p>
-            <div class="price">
-              <span class="amount">$12</span>
-              <span class="period">+ $1.50/mile</span>
-            </div>
-          </div>
-          <ul class="pricing-features">
-            <li>Real-time tracking</li>
-            <li>Insurance up to $500</li>
-            <li>Same-day delivery (local)</li>
-            <li>Mobile notifications</li>
-            <li>Priority handling</li>
-            <li>Fragile item protection</li>
-          </ul>
-          <a href="/register-fix.html" class="btn">Get Started</a>
-        </div>
-      </div>
-      
-      <div class="extra-large-note">
-        <p>Need to ship extra large packages (30+ lbs)? <a href="/register-fix.html">Create an account</a> for custom pricing.</p>
-      </div>
-    </section>
+
     
     <section class="cta-section">
       <h2>Ready to experience hassle-free deliveries?</h2>
