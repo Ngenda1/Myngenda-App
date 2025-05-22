@@ -10,8 +10,8 @@ window.myngendaAPI = {
   // Main fetch handler that works in all environments
   fetch: async function(endpoint, options = {}) {
     try {
-      // Ensure we get the base URL correctly
-      const baseUrl = window.location.origin;
+      // // Direct connection to the Replit backend
+const baseUrl = "https://your-replit-name.replit.app"; // Replace with your actual Replit URL;
       const url = endpoint.startsWith('/') 
         ? `${baseUrl}${endpoint}` 
         : `${baseUrl}/${endpoint}`;
