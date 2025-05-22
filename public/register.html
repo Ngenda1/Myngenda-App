@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Myngenda - Create Account</title>
   
-  <!-- Favicon for browser tabs and bookmarks -->
-  <link rel="icon" href="favicon.ico" sizes="any">
+  <!-- Official Myngenda icon for browser tabs and bookmarks -->
   <link rel="icon" href="icons/myngenda-icon.png" type="image/png">
   
   <!-- Apple Touch Icon (for iOS devices) -->
   <link rel="apple-touch-icon" href="icons/myngenda-icon.png">
+  
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
   
   <style>
     :root {
@@ -312,6 +314,9 @@
     </div>
   </div>
   
+  <!-- Load our reliable API handler -->
+  <script src="/fetch-handler.js"></script>
+  
   <script>
     // Show/hide Google sign-in based on account type
     document.getElementById('accountType').addEventListener('change', function() {
@@ -330,6 +335,12 @@
       const accountTypeEvent = new Event('change');
       document.getElementById('accountType').dispatchEvent(accountTypeEvent);
     });
+    
+    // Update Google auth link to use our reliable handler
+    document.querySelector('.google-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.myngendaAPI.googleAuth();
+    });
   
     document.getElementById('registerForm').addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -340,6 +351,12 @@
       errorMessage.style.display = 'none';
       successMessage.style.display = 'none';
       
+      // Show loading indicator
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Creating Account...';
+      
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       
@@ -347,6 +364,8 @@
       if (password !== confirmPassword) {
         errorMessage.textContent = 'Passwords do not match';
         errorMessage.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
         return;
       }
       
@@ -363,53 +382,24 @@
       try {
         console.log('Attempting to register with data:', formData);
         
-        // Use a consistent URL approach for all environments
-        // This fixes connection issues by always using a relative URL
-        const apiUrl = '/api/token/register';
-        
-        console.log('Using registration endpoint:', apiUrl);
-        
-        // Use token-based registration with improved error handling
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include'
-        });
-        
-        console.log('Registration response status:', response.status);
+        // Use our reliable API handler
+        const { response, data } = await window.myngendaAPI.register(formData);
         
         if (!response.ok) {
-          let errorData = { message: 'Registration failed' };
-          try {
-            errorData = await response.json();
-            console.log('Error details:', errorData);
-          } catch (e) {
-            console.error('Could not parse error response:', e);
-            // If response is not JSON, use default error message
-          }
-          
-          errorMessage.textContent = errorData.message || 'Registration failed. Please try again.';
+          errorMessage.textContent = data.message || 'Registration failed. Please try again.';
           errorMessage.style.display = 'block';
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
           return;
         }
         
-        const result = await response.json();
-        console.log('Registration successful:', result);
+        console.log('Registration successful:', data);
         
         // Show success message
         successMessage.style.display = 'block';
         document.getElementById('registerForm').reset();
         
-        // Store token in localStorage if available
-        if (result.token) {
-          localStorage.setItem('auth_token', result.token);
-        }
-        
-        // Take user directly to dashboard instead of login page
+        // Redirect to dashboard after short delay
         setTimeout(() => {
           window.location.href = '/user/home';
         }, 2000);
@@ -419,7 +409,7 @@
         // More detailed error message with troubleshooting help
         errorMessage.innerHTML = `
           <p><strong>Connection issue detected.</strong></p>
-          <p>We're having trouble connecting to our servers. This might be due to:</p>
+          <p>${error.message || 'We\'re having trouble connecting to our servers.'} This might be due to:</p>
           <ul style="text-align: left; margin-bottom: 10px;">
             <li>Temporary server maintenance</li>
             <li>Network connectivity issues</li>
@@ -428,6 +418,8 @@
           <p>Please try again in a few moments or contact support if this persists.</p>
         `;
         errorMessage.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
       }
     });
   </script>

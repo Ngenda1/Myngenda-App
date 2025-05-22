@@ -143,9 +143,95 @@ export function setupGoogleRoutes(app: any) {
             secure: process.env.NODE_ENV === 'production',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
           });
+          
+          // Get where to redirect from query param or use default
+          const returnTo = req.query.returnTo || '/user/home';
+          
+          // More reliable approach that sends authorization to parent window
+          // This prevents the redirect to landing page issue
+          const script = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Authentication Successful</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  height: 100vh;
+                  margin: 0;
+                  background-color: #f5f5f5;
+                  flex-direction: column;
+                }
+                .success-card {
+                  background: white;
+                  border-radius: 8px;
+                  padding: 30px;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                  text-align: center;
+                  max-width: 400px;
+                }
+                h1 {
+                  color: #4CAF50;
+                  margin-top: 0;
+                }
+                .redirect-text {
+                  margin: 20px 0;
+                  color: #666;
+                }
+                .spinner {
+                  border: 4px solid #f3f3f3;
+                  border-top: 4px solid #4CAF50;
+                  border-radius: 50%;
+                  width: 30px;
+                  height: 30px;
+                  margin: 20px auto;
+                  animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="success-card">
+                <h1>Successfully Signed In</h1>
+                <div class="spinner"></div>
+                <p class="redirect-text">Redirecting you to the dashboard...</p>
+              </div>
+              
+              <script>
+                // This is the most reliable way to handle Google Auth with JWT tokens
+                // Store token in localStorage first
+                localStorage.setItem('auth_token', '${token}');
+                
+                // Notify the opener window if this was opened as a popup
+                if (window.opener) {
+                  window.opener.postMessage({
+                    type: 'AUTH_SUCCESS',
+                    token: '${token}'
+                  }, '*');
+                  setTimeout(() => window.close(), 1000);
+                } else {
+                  // If not a popup, redirect directly
+                  window.location.href = '${returnTo}';
+                }
+                
+                // Fallback redirect after a delay
+                setTimeout(() => {
+                  window.location.href = '${returnTo}';
+                }, 2000);
+              </script>
+            </body>
+            </html>
+          `;
+          return res.send(script);
         }
         
-        // Redirect to the main user dashboard page after successful login
+        // If somehow we don't have a token, redirect to a static path
         res.redirect('/user/home');
       } catch (error) {
         console.error('Error processing Google callback:', error);

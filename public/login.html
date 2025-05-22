@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Myngenda - Sign In</title>
   
-  <!-- Favicon for browser tabs and bookmarks -->
-  <link rel="icon" href="favicon.ico" sizes="any">
+  <!-- Official Myngenda icon for browser tabs and bookmarks -->
   <link rel="icon" href="icons/myngenda-icon.png" type="image/png">
   
   <!-- Apple Touch Icon (for iOS devices) -->
   <link rel="apple-touch-icon" href="icons/myngenda-icon.png">
+  
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
   
   <style>
     :root {
@@ -173,6 +175,9 @@
     </div>
   </div>
   
+  <!-- Load our reliable API handler -->
+  <script src="/fetch-handler.js"></script>
+  
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -180,51 +185,62 @@
       const errorMessage = document.getElementById('errorMessage');
       errorMessage.style.display = 'none';
       
-      const formData = {
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-      };
+      // Show loading indicator
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Signing in...';
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
       
       try {
-        console.log('Attempting to log in with:', formData.email);
+        console.log('Attempting to log in with:', email);
         
-        // Use a consistent URL pattern that works in all environments
-        const apiUrl = '/api/token/login';
+        // Use our reliable API handler
+        const { response, data } = await window.myngendaAPI.login(email, password);
         
-        // Try token-based login first for external users
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include'
-        });
-        
-        console.log('Login response status:', response.status);
-        
-        const result = await response.json();
-        console.log('Login response:', result);
+        console.log('Login response:', data);
         
         if (response.ok) {
-          // Store the auth token
-          if (result.token) {
-            localStorage.setItem('auth_token', result.token);
-          }
+          // Show success message
+          const successMessage = document.createElement('div');
+          successMessage.style.backgroundColor = '#e8f5e9';
+          successMessage.style.color = '#2e7d32';
+          successMessage.style.padding = '12px';
+          successMessage.style.borderRadius = '4px';
+          successMessage.style.marginBottom = '20px';
+          successMessage.style.textAlign = 'center';
+          successMessage.innerHTML = '<strong>Login successful!</strong><br>Redirecting to dashboard...';
           
-          // Redirect to main user dashboard
-          window.location.href = '/user/home';
+          errorMessage.parentNode.insertBefore(successMessage, errorMessage);
+          
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/user/home';
+          }, 1000);
         } else {
           // Show error message
-          errorMessage.textContent = result.message || 'Invalid email or password';
+          errorMessage.textContent = data.message || 'Invalid email or password';
           errorMessage.style.display = 'block';
+          
+          // Reset button
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
         }
       } catch (error) {
         console.error('Login error:', error);
         
-        // Show error message
-        errorMessage.textContent = 'Error connecting to server. Please try again later.';
+        // Show better error message
+        errorMessage.innerHTML = `
+          <strong>Connection problem!</strong><br>
+          ${error.message || 'Could not connect to the server. Please check your internet connection and try again.'}
+        `;
         errorMessage.style.display = 'block';
+        
+        // Reset button
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
       }
     });
   </script>
