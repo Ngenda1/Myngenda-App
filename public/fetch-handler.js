@@ -10,8 +10,11 @@ window.myngendaAPI = {
   // Main fetch handler that works in all environments
   fetch: async function(endpoint, options = {}) {
     try {
-      // // Direct connection to the Replit backend
-const baseUrl = "https://your-replit-name.replit.app"; // Replace with your actual Replit URL;
+      // Use local API endpoints - Netlify _redirects will proxy to Replit
+      // This avoids CORS issues completely
+      const baseUrl = window.location.origin;
+      
+      // Ensure proper URL formatting
       const url = endpoint.startsWith('/') 
         ? `${baseUrl}${endpoint}` 
         : `${baseUrl}/${endpoint}`;
@@ -42,6 +45,9 @@ const baseUrl = "https://your-replit-name.replit.app"; // Replace with your actu
       if (token) {
         mergedOptions.headers['Authorization'] = `Bearer ${token}`;
       }
+      
+      // Add custom header to help identify the origin
+      mergedOptions.headers['X-Myngenda-Client'] = 'production';
       
       // Add abort controller with timeout
       const controller = new AbortController();
