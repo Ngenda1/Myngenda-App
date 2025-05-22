@@ -279,20 +279,32 @@
       };
       
       try {
+        console.log('Attempting to register with data:', formData);
+        
+        // Use absolute URL for external users
+        const apiUrl = window.location.hostname.includes('replit') 
+          ? '/api/token/register'  // When running in Replit
+          : 'https://myngenda.com/api/token/register'; // When deployed
+
         // Use token-based registration for external users
-        const response = await fetch('/api/token/register', {
+        const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify(formData),
+          credentials: 'include'
         });
+        
+        console.log('Registration response status:', response.status);
         
         if (!response.ok) {
           let errorData = { message: 'Registration failed' };
           try {
             errorData = await response.json();
+            console.log('Error details:', errorData);
           } catch (e) {
+            console.error('Could not parse error response:', e);
             // If response is not JSON, use default error message
           }
           
@@ -302,6 +314,7 @@
         }
         
         const result = await response.json();
+        console.log('Registration successful:', result);
         
         // Show success message
         successMessage.style.display = 'block';
