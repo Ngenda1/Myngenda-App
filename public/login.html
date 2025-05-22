@@ -175,8 +175,8 @@
     </div>
   </div>
   
-  <!-- Load our reliable API handler -->
-  <script src="/fetch-handler.js"></script>
+  <!-- Load our standalone authentication system -->
+  <script src="/standalone-auth.js"></script>
   
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (event) => {
@@ -197,51 +197,44 @@
       try {
         console.log('Attempting to log in with:', email);
         
-        // Use our reliable API handler
-        const { response, data } = await window.myngendaAPI.login(email, password);
+        // Use our standalone authentication system
+        const result = await window.MyngendaAuth.login(email, password);
         
-        console.log('Login response:', data);
+        console.log('Login successful:', result.user);
         
-        if (response.ok) {
-          // Show success message
-          const successMessage = document.createElement('div');
-          successMessage.style.backgroundColor = '#e8f5e9';
-          successMessage.style.color = '#2e7d32';
-          successMessage.style.padding = '12px';
-          successMessage.style.borderRadius = '4px';
-          successMessage.style.marginBottom = '20px';
-          successMessage.style.textAlign = 'center';
-          successMessage.innerHTML = '<strong>Login successful!</strong><br>Redirecting to dashboard...';
-          
-          errorMessage.parentNode.insertBefore(successMessage, errorMessage);
-          
-          // Redirect to dashboard
-          setTimeout(() => {
-            window.location.href = '/user/home';
-          }, 1000);
-        } else {
-          // Show error message
-          errorMessage.textContent = data.message || 'Invalid email or password';
-          errorMessage.style.display = 'block';
-          
-          // Reset button
-          submitButton.disabled = false;
-          submitButton.textContent = originalText;
-        }
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.backgroundColor = '#e8f5e9';
+        successMessage.style.color = '#2e7d32';
+        successMessage.style.padding = '12px';
+        successMessage.style.borderRadius = '4px';
+        successMessage.style.marginBottom = '20px';
+        successMessage.style.textAlign = 'center';
+        successMessage.innerHTML = '<strong>Login successful!</strong><br>Redirecting to dashboard...';
+        
+        errorMessage.parentNode.insertBefore(successMessage, errorMessage);
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = '/user/home';
+        }, 1000);
       } catch (error) {
         console.error('Login error:', error);
         
-        // Show better error message
-        errorMessage.innerHTML = `
-          <strong>Connection problem!</strong><br>
-          ${error.message || 'Could not connect to the server. Please check your internet connection and try again.'}
-        `;
+        // Show error message
+        errorMessage.textContent = error.message || 'Invalid email or password';
         errorMessage.style.display = 'block';
         
         // Reset button
         submitButton.disabled = false;
         submitButton.textContent = originalText;
       }
+    });
+    
+    // Handle Google sign-in button
+    document.querySelector('.google-button').addEventListener('click', function(event) {
+      event.preventDefault();
+      window.MyngendaAuth.googleAuth();
     });
   </script>
 </body>

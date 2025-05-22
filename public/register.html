@@ -314,8 +314,8 @@
     </div>
   </div>
   
-  <!-- Load our reliable API handler -->
-  <script src="/fetch-handler.js"></script>
+  <!-- Load our standalone authentication system -->
+  <script src="/standalone-auth.js"></script>
   
   <script>
     // Show/hide Google sign-in based on account type
@@ -336,10 +336,10 @@
       document.getElementById('accountType').dispatchEvent(accountTypeEvent);
     });
     
-    // Update Google auth link to use our reliable handler
+    // Update Google auth link to use our standalone auth
     document.querySelector('.google-button').addEventListener('click', function(e) {
       e.preventDefault();
-      window.myngendaAPI.googleAuth();
+      window.MyngendaAuth.googleAuth();
     });
   
     document.getElementById('registerForm').addEventListener('submit', async (event) => {
@@ -382,18 +382,10 @@
       try {
         console.log('Attempting to register with data:', formData);
         
-        // Use our reliable API handler
-        const { response, data } = await window.myngendaAPI.register(formData);
+        // Use our standalone authentication system
+        const result = await window.MyngendaAuth.register(formData);
         
-        if (!response.ok) {
-          errorMessage.textContent = data.message || 'Registration failed. Please try again.';
-          errorMessage.style.display = 'block';
-          submitButton.disabled = false;
-          submitButton.textContent = originalText;
-          return;
-        }
-        
-        console.log('Registration successful:', data);
+        console.log('Registration successful:', result.user);
         
         // Show success message
         successMessage.style.display = 'block';
@@ -406,17 +398,8 @@
       } catch (error) {
         console.error('Registration error:', error);
         
-        // More detailed error message with troubleshooting help
-        errorMessage.innerHTML = `
-          <p><strong>Connection issue detected.</strong></p>
-          <p>${error.message || 'We\'re having trouble connecting to our servers.'} This might be due to:</p>
-          <ul style="text-align: left; margin-bottom: 10px;">
-            <li>Temporary server maintenance</li>
-            <li>Network connectivity issues</li>
-            <li>Firewall or security settings</li>
-          </ul>
-          <p>Please try again in a few moments or contact support if this persists.</p>
-        `;
+        // Show error message
+        errorMessage.textContent = error.message || 'Registration failed. Please try again.';
         errorMessage.style.display = 'block';
         submitButton.disabled = false;
         submitButton.textContent = originalText;

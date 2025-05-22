@@ -49,6 +49,12 @@ window.myngendaAPI = {
       // Add custom header to help identify the origin
       mergedOptions.headers['X-Myngenda-Client'] = 'production';
       
+      // This is needed for CORS to work with credentials
+      if (mergedOptions.credentials === 'include') {
+        // Make sure withCredentials is set for XMLHttpRequest based fetch
+        mergedOptions.withCredentials = true;
+      }
+      
       // Add abort controller with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
