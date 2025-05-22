@@ -173,6 +173,58 @@
       margin-top: 4px;
       color: #666;
     }
+    
+    /* Google Sign-In Styles */
+    .google-sign-in {
+      margin-top: 25px;
+    }
+    
+    .separator {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .separator::before,
+    .separator::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .separator span {
+      padding: 0 10px;
+      color: #777;
+      font-size: 14px;
+    }
+    
+    .google-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      background: white;
+      color: #444;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+      text-decoration: none;
+    }
+    
+    .google-button:hover {
+      background: #f8f8f8;
+    }
+    
+    .google-icon {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -242,6 +294,18 @@
         <button type="submit" class="submit-button">Create Account</button>
       </form>
       
+      <!-- Google Sign-In (Only shown for customers) -->
+      <div id="googleSignIn" class="google-sign-in">
+        <div class="separator">
+          <span>OR</span>
+        </div>
+        
+        <a href="/api/auth/google" class="google-button">
+          <img src="icons/google-logo.png" alt="Google" class="google-icon">
+          <span>Sign up with Google</span>
+        </a>
+      </div>
+      
       <div class="register-footer">
         <p>Already have an account? <a href="login.html">Sign In</a></p>
       </div>
@@ -249,6 +313,24 @@
   </div>
   
   <script>
+    // Show/hide Google sign-in based on account type
+    document.getElementById('accountType').addEventListener('change', function() {
+      const accountType = this.value;
+      const googleSignIn = document.getElementById('googleSignIn');
+      
+      if (accountType === 'user') {
+        googleSignIn.style.display = 'block';
+      } else {
+        googleSignIn.style.display = 'none';
+      }
+    });
+    
+    // Trigger the change event on page load to set initial state
+    document.addEventListener('DOMContentLoaded', function() {
+      const accountTypeEvent = new Event('change');
+      document.getElementById('accountType').dispatchEvent(accountTypeEvent);
+    });
+  
     document.getElementById('registerForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       
@@ -281,16 +363,24 @@
       try {
         console.log('Attempting to register with data:', formData);
         
-        // Use absolute URL for external users
-        const apiUrl = window.location.hostname.includes('replit') 
-          ? '/api/token/register'  // When running in Replit
-          : 'https://myngenda.com/api/token/register'; // When deployed
-
-        // Use token-based registration for external users
+        // Improved URL handling to prevent connection errors
+        let apiUrl = '/api/token/register'; // Default path
+        
+        // If we're on an external domain (not localhost or replit)
+        if (!window.location.hostname.includes('replit') && 
+            !window.location.hostname.includes('localhost')) {
+          // Use relative URL with same origin to avoid CORS issues
+          apiUrl = '/api/token/register';
+        }
+        
+        console.log('Using registration endpoint:', apiUrl);
+        
+        // Use token-based registration with improved error handling
         const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
           body: JSON.stringify(formData),
           credentials: 'include'
@@ -332,8 +422,17 @@
       } catch (error) {
         console.error('Registration error:', error);
         
-        // Show error message for connection issues
-        errorMessage.textContent = 'Error connecting to the server. Please check your internet connection and try again.';
+        // More detailed error message with troubleshooting help
+        errorMessage.innerHTML = `
+          <p><strong>Connection issue detected.</strong></p>
+          <p>We're having trouble connecting to our servers. This might be due to:</p>
+          <ul style="text-align: left; margin-bottom: 10px;">
+            <li>Temporary server maintenance</li>
+            <li>Network connectivity issues</li>
+            <li>Firewall or security settings</li>
+          </ul>
+          <p>Please try again in a few moments or contact support if this persists.</p>
+        `;
         errorMessage.style.display = 'block';
       }
     });
