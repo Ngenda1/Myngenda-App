@@ -783,7 +783,6 @@
       bottom: 0;
       background-color: rgba(255, 255, 255, 0.7);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 1000;
@@ -796,48 +795,20 @@
       border-top: 4px solid var(--primary-color);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-bottom: 15px;
-    }
-    
-    .loading-text {
-      font-size: 1.1rem;
-      color: var(--secondary-color);
     }
 
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    /* Auth checking overlay */
-    .auth-checking {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--white);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
   </style>
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <!-- Auth checking overlay -->
-  <div class="auth-checking" id="authChecking">
-    <div class="spinner"></div>
-    <div class="loading-text">Checking your authentication...</div>
-  </div>
-
   <!-- Loading animation -->
-  <div class="loading" id="loadingOverlay" style="display: none;">
+  <div class="loading" id="loadingOverlay">
     <div class="spinner"></div>
-    <div class="loading-text">Loading dashboard...</div>
   </div>
 
   <header>
@@ -1173,18 +1144,9 @@
   </div>
 
   <!-- Load our enhanced authentication system -->
-  <script src="/auth-handler.js"></script>
+  <script src="/auth-connector.js"></script>
   
   <script>
-    // Show/hide loading overlay
-    function showLoading() {
-      document.getElementById('loadingOverlay').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loadingOverlay').style.display = 'none';
-    }
-    
     // Mobile menu toggle
     document.getElementById('menuToggle').addEventListener('click', function() {
       document.getElementById('sidebar').classList.toggle('active');
@@ -1192,22 +1154,17 @@
     
     // User authentication check and profile loading
     document.addEventListener('DOMContentLoaded', function() {
-      // First check if the auth system is working
-      if (!window.MyngendaAPI) {
-        console.error('Authentication system not loaded!');
-        alert('Error: Authentication system not loaded. Please refresh the page.');
-        return;
-      }
+      // Hide loading overlay after page loads
+      setTimeout(() => {
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }, 1000);
       
       // Check if user is logged in
-      if (!window.MyngendaAPI.isAuthenticated()) {
-        console.log('User not authenticated, redirecting to login...');
+      if (!window.MyngendaAPI || !window.MyngendaAPI.isAuthenticated()) {
+        // Redirect to login page if not authenticated
         window.location.href = '/login.html';
         return;
       }
-      
-      // Hide auth checking overlay
-      document.getElementById('authChecking').style.display = 'none';
       
       // Get current user
       const user = window.MyngendaAPI.getCurrentUser();
@@ -1215,21 +1172,18 @@
       // Update UI with user information
       if (user) {
         // Set user name
-        const firstName = user.firstName || '';
-        const lastName = user.lastName || '';
-        const userName = `${firstName} ${lastName}`;
+        const userName = `${user.firstName} ${user.lastName}`;
         document.getElementById('userName').textContent = userName;
-        document.getElementById('welcomeUserName').textContent = firstName;
+        document.getElementById('welcomeUserName').textContent = user.firstName;
         
         // Set user initials in avatar
-        const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+        const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
         document.getElementById('userInitials').textContent = initials;
         
         // Set user role badge
         const userRole = document.getElementById('userRole');
-        const role = user.role || 'user';
-        userRole.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-        userRole.className = `role-badge role-${role}`;
+        userRole.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+        userRole.className = `role-badge role-${user.role}`;
       }
       
       // Handle logout
@@ -1237,19 +1191,16 @@
         window.MyngendaAPI.logout();
       });
       
+      // Simulate loading real delivery data
+      // In a real application, this would fetch data from your API
       console.log("User dashboard loaded successfully!");
     });
     
-    // Handle network errors and authentication errors
-    window.addEventListener('error', function(event) {
-      console.error('Global error caught:', event.error);
-      
-      // If it's a network error, show a user-friendly message
-      if (event.error && event.error.message && 
-          (event.error.message.includes('network') || 
-           event.error.message.includes('fetch'))) {
-        alert('Network error detected. Please check your internet connection and try again.');
-      }
+    // Prevent the loading overlay from showing too long
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }, 500);
     });
   </script>
 </body>
