@@ -314,8 +314,8 @@
     </div>
   </div>
   
-  <!-- Load our standalone authentication system -->
-  <script src="/standalone-auth.js"></script>
+  <!-- Load our direct API connection system -->
+  <script src="/direct-auth.js"></script>
   
   <script>
     // Show/hide Google sign-in based on account type
@@ -336,10 +336,10 @@
       document.getElementById('accountType').dispatchEvent(accountTypeEvent);
     });
     
-    // Update Google auth link to use our standalone auth
+    // Update Google auth link to use our direct API
     document.querySelector('.google-button').addEventListener('click', function(e) {
       e.preventDefault();
-      window.MyngendaAuth.googleAuth();
+      window.MyngendaAPI.googleAuth();
     });
   
     document.getElementById('registerForm').addEventListener('submit', async (event) => {
@@ -382,14 +382,17 @@
       try {
         console.log('Attempting to register with data:', formData);
         
-        // Use our standalone authentication system
-        const result = await window.MyngendaAuth.register(formData);
+        // Use our direct API connection
+        const result = await window.MyngendaAPI.register(formData);
         
         console.log('Registration successful:', result.user);
         
         // Show success message
         successMessage.style.display = 'block';
         document.getElementById('registerForm').reset();
+        
+        // Store login data immediately in session storage for seamless user experience
+        sessionStorage.setItem('just_registered', 'true');
         
         // Redirect to dashboard after short delay
         setTimeout(() => {

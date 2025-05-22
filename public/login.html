@@ -175,10 +175,19 @@
     </div>
   </div>
   
-  <!-- Load our standalone authentication system -->
-  <script src="/standalone-auth.js"></script>
+  <!-- Load our direct API connection system -->
+  <script src="/direct-auth.js"></script>
   
   <script>
+    // Check if user just registered
+    document.addEventListener('DOMContentLoaded', function() {
+      if (sessionStorage.getItem('just_registered') === 'true') {
+        sessionStorage.removeItem('just_registered');
+        // Auto redirect to dashboard
+        window.location.href = '/user/home';
+      }
+    });
+    
     document.getElementById('loginForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       
@@ -197,8 +206,8 @@
       try {
         console.log('Attempting to log in with:', email);
         
-        // Use our standalone authentication system
-        const result = await window.MyngendaAuth.login(email, password);
+        // Use our direct API connection
+        const result = await window.MyngendaAPI.login(email, password);
         
         console.log('Login successful:', result.user);
         
@@ -234,7 +243,7 @@
     // Handle Google sign-in button
     document.querySelector('.google-button').addEventListener('click', function(event) {
       event.preventDefault();
-      window.MyngendaAuth.googleAuth();
+      window.MyngendaAPI.googleAuth();
     });
   </script>
 </body>
