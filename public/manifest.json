@@ -1,0 +1,121 @@
+{
+  "name": "Myngenda Delivery",
+  "short_name": "Myngenda",
+  "description": "Fast and reliable package delivery service in Africa",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay"],
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#4caf50",
+  "categories": ["delivery", "logistics", "transportation"],
+  "screenshots": [
+    {
+      "src": "/images/cover-photo-with-logo.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Myngenda delivery driver with branded delivery box"
+    },
+    {
+      "src": "/screenshots/homepage.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Homescreen of Myngenda delivery app"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Request Delivery",
+      "url": "/request-delivery",
+      "description": "Request a new delivery"
+    },
+    {
+      "name": "Track Delivery",
+      "url": "/user/active-deliveries",
+      "description": "Track your current deliveries"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/myngenda-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/myngenda-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/myngenda-icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "handle_links": "auto",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "image/*": [".png", ".jpg", ".jpeg"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+myngenda",
+      "url": "/?tracking=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "widgets": [
+    {
+      "name": "Delivery Tracker",
+      "short_name": "Tracker",
+      "description": "Track your current deliveries in progress",
+      "tag": "tracker",
+      "template": "trackerTemplate",
+      "ms_ac_template": "widgets/tracker.json",
+      "data": "/api/widgets/tracker-data",
+      "screenshots": [
+        {
+          "src": "/screenshots/widget-tracker.png",
+          "sizes": "450x450",
+          "label": "Delivery tracking widget"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192" 
+        }
+      ]
+    }
+  ],
+  "lang": "en"
+}

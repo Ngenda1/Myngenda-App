@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Myngenda - Delivery Services</title>
+  
+  <!-- Favicon for browser tabs and bookmarks -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="icons/myngenda-icon.png" type="image/png">
+  
+  <!-- Apple Touch Icon (for iOS devices) -->
+  <link rel="apple-touch-icon" href="icons/myngenda-icon.png">
+  
+  <!-- PWA manifest file -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Meta tags for SEO and sharing -->
+  <meta name="description" content="Myngenda - Where Speed Meets Trust. Fast and reliable delivery services across Africa.">
+  <meta property="og:title" content="Myngenda Delivery Services">
+  <meta property="og:description" content="Where Speed Meets Trust. Fast and reliable delivery services across Africa.">
+  <meta property="og:image" content="images/myngenda-hero.png">
+  
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --primary-dark: #3b8c3f;
+      --accent-color: #424242;
+      --text-color: #fff;
+      --body-bg: #f5f5f5;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body, html {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100%;
+      background-color: var(--body-bg);
+    }
+    
+    .hero-container {
+      height: 100vh;
+      width: 100%;
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/myngenda-hero.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      height: 50px;
+      width: auto;
+    }
+    
+    .logo-text {
+      color: var(--text-color);
+      font-size: 24px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-button {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .login-btn {
+      color: var(--text-color);
+      border: 2px solid var(--text-color);
+      background: transparent;
+    }
+    
+    .login-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .register-btn {
+      color: #333;
+      background-color: var(--text-color);
+      border: 2px solid var(--text-color);
+    }
+    
+    .register-btn:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .hero-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+      color: var(--text-color);
+    }
+    
+    .hero-title {
+      font-size: 64px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    
+    .hero-subtitle {
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 30px;
+    }
+    
+    .hero-tagline {
+      font-size: 20px;
+      font-weight: 400;
+      max-width: 600px;
+      opacity: 0.9;
+    }
+    
+    .cta-container {
+      margin-top: 40px;
+    }
+    
+    .cta-button {
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+    
+    .primary-cta {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+    }
+    
+    .primary-cta:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 42px;
+      }
+      
+      .hero-subtitle {
+        font-size: 22px;
+      }
+      
+      .navbar {
+        padding: 15px 20px;
+      }
+      
+      .nav-button {
+        padding: 8px 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 36px;
+      }
+      
+      .hero-subtitle {
+        font-size: 18px;
+      }
+      
+      .logo-text {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-container">
+    <nav class="navbar">
+      <div class="logo-container">
+        <img src="icons/myngenda-icon.png" alt="Myngenda Logo" class="logo">
+        <span class="logo-text">Myngenda</span>
+      </div>
+      
+      <div class="nav-links">
+        <a href="login.html" class="nav-button login-btn">Sign In</a>
+        <a href="register.html" class="nav-button register-btn">Create Account</a>
+      </div>
+    </nav>
+    
+    <div class="hero-content">
+      <h1 class="hero-title">Myngenda</h1>
+      <h2 class="hero-subtitle">Delivery Services</h2>
+      <p class="hero-tagline">Where Speed Meets Trust</p>
+      
+      <div class="cta-container">
+        <a href="register.html" class="cta-button primary-cta">Get Started</a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Check if service worker is supported
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
