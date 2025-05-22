@@ -161,9 +161,9 @@
       
       <div style="margin-top: 25px; text-align: center;">
         <p style="color: #666; margin-bottom: 15px;">Or sign in with</p>
-        <a href="/api/auth/google" style="display: inline-block;">
-          <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" 
-               alt="Sign in with Google" style="height: 40px;">
+        <a href="/api/auth/google?redirect=/user/home" style="display: inline-block;">
+          <img src="icons/google-logo.png" 
+               alt="Sign in with Google" style="height: 40px; width: auto;">
         </a>
       </div>
       
@@ -188,10 +188,8 @@
       try {
         console.log('Attempting to log in with:', formData.email);
         
-        // Use absolute URL for external users
-        const apiUrl = window.location.hostname.includes('replit') 
-          ? '/api/token/login'  // When running in Replit
-          : 'https://myngenda.com/api/token/login'; // When deployed
+        // Use a consistent URL pattern that works in all environments
+        const apiUrl = '/api/token/login';
         
         // Try token-based login first for external users
         const response = await fetch(apiUrl, {
@@ -214,8 +212,8 @@
             localStorage.setItem('auth_token', result.token);
           }
           
-          // Redirect to dashboard
-          window.location.href = '/dashboard';
+          // Redirect to main user dashboard
+          window.location.href = '/user/home';
         } else {
           // Show error message
           errorMessage.textContent = result.message || 'Invalid email or password';

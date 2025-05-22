@@ -300,7 +300,7 @@
           <span>OR</span>
         </div>
         
-        <a href="/api/auth/google" class="google-button">
+        <a href="/api/auth/google?redirect=/user/home" class="google-button">
           <img src="icons/google-logo.png" alt="Google" class="google-icon">
           <span>Sign up with Google</span>
         </a>
@@ -363,15 +363,9 @@
       try {
         console.log('Attempting to register with data:', formData);
         
-        // Improved URL handling to prevent connection errors
-        let apiUrl = '/api/token/register'; // Default path
-        
-        // If we're on an external domain (not localhost or replit)
-        if (!window.location.hostname.includes('replit') && 
-            !window.location.hostname.includes('localhost')) {
-          // Use relative URL with same origin to avoid CORS issues
-          apiUrl = '/api/token/register';
-        }
+        // Use a consistent URL approach for all environments
+        // This fixes connection issues by always using a relative URL
+        const apiUrl = '/api/token/register';
         
         console.log('Using registration endpoint:', apiUrl);
         
@@ -415,10 +409,10 @@
           localStorage.setItem('auth_token', result.token);
         }
         
-        // Redirect to login page after 3 seconds
+        // Take user directly to dashboard instead of login page
         setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 3000);
+          window.location.href = '/user/home';
+        }, 2000);
       } catch (error) {
         console.error('Registration error:', error);
         

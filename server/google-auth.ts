@@ -145,8 +145,8 @@ export function setupGoogleRoutes(app: any) {
           });
         }
         
-        // Redirect to dashboard after successful login
-        res.redirect('/dashboard');
+        // Redirect to the main user dashboard page after successful login
+        res.redirect('/user/home');
       } catch (error) {
         console.error('Error processing Google callback:', error);
         res.redirect('/login?error=google_callback_error');
