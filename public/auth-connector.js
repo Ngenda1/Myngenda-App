@@ -15,15 +15,17 @@ const API_BASE_URL = detectApiBaseUrl();
  */
 function detectApiBaseUrl() {
   // Check if we're on the same domain as the API (Replit hosting)
-  if (window.location.hostname.includes('replit')) {
+  if (window.location.hostname.includes('replit.app') || 
+      window.location.hostname.includes('replit.dev')) {
     return ''; // Same domain, use relative URLs
   }
   
-  // Check for Netlify domain
+  // Check for Netlify domain or custom domain
   if (window.location.hostname.includes('netlify.app') || 
       window.location.hostname === 'myngenda.com' ||
       window.location.hostname === 'www.myngenda.com') {
-    return 'https://myngenda-app.replit.app'; // External Replit API
+    // Make sure this points to your actual Replit app URL
+    return 'https://myngenda-app.replit.app'; 
   }
   
   // Local development
@@ -95,6 +97,7 @@ async function apiRequest(endpoint, options = {}) {
     : `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
   
   try {
+    console.log('Making API request to:', url);
     const response = await fetch(url, options);
     
     // Handle 401 Unauthorized - redirect to login
@@ -121,8 +124,13 @@ async function apiRequest(endpoint, options = {}) {
  */
 async function login(email, password) {
   try {
+    console.log('Attempting to log in with:', email);
+    
     // First try token-based login (for external users)
-    const tokenResponse = await fetch(`${API_BASE_URL}/api/token/login`, {
+    const tokenUrl = `${API_BASE_URL}/api/token/login`;
+    console.log('Trying token login at:', tokenUrl);
+    
+    const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -131,6 +139,7 @@ async function login(email, password) {
     });
     
     const tokenData = await tokenResponse.json();
+    console.log('Token login response:', tokenData);
     
     if (tokenData.success) {
       // Store token and user data
@@ -139,7 +148,10 @@ async function login(email, password) {
     }
     
     // If token login fails, try session-based login (for internal users)
-    const sessionResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const sessionUrl = `${API_BASE_URL}/api/auth/login`;
+    console.log('Trying session login at:', sessionUrl);
+    
+    const sessionResponse = await fetch(sessionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -149,6 +161,7 @@ async function login(email, password) {
     });
     
     const sessionData = await sessionResponse.json();
+    console.log('Session login response:', sessionData);
     
     if (sessionData.success) {
       // Store user data (no token for session auth)
@@ -172,8 +185,13 @@ async function login(email, password) {
  */
 async function register(userData) {
   try {
+    console.log('Attempting to register with:', userData.email);
+    
     // First try token-based registration (for external users)
-    const tokenResponse = await fetch(`${API_BASE_URL}/api/token/register`, {
+    const tokenUrl = `${API_BASE_URL}/api/token/register`;
+    console.log('Trying token registration at:', tokenUrl);
+    
+    const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -182,6 +200,7 @@ async function register(userData) {
     });
     
     const tokenData = await tokenResponse.json();
+    console.log('Token registration response:', tokenData);
     
     if (tokenData.success) {
       // Store token and user data
@@ -190,7 +209,10 @@ async function register(userData) {
     }
     
     // If token registration fails, try session-based registration (for internal users)
-    const sessionResponse = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    const sessionUrl = `${API_BASE_URL}/api/auth/register`;
+    console.log('Trying session registration at:', sessionUrl);
+    
+    const sessionResponse = await fetch(sessionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -200,6 +222,7 @@ async function register(userData) {
     });
     
     const sessionData = await sessionResponse.json();
+    console.log('Session registration response:', sessionData);
     
     if (sessionData.success) {
       // Store user data (no token for session auth)
@@ -247,8 +270,10 @@ function redirectToDashboard() {
     
     // Redirect based on role
     if (userData && userData.role === 'admin') {
+      console.log('Redirecting admin to dashboard');
       window.location.href = '/admin/dashboard.html';
     } else {
+      console.log('Redirecting user to home');
       window.location.href = '/user/home.html';
     }
   }

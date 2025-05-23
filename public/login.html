@@ -233,6 +233,13 @@
       color: #999;
       margin-top: 15px;
     }
+    
+    #debugInfo {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -275,7 +282,10 @@
         </button>
       </div>
       
-      <div class="version">v1.2.0</div>
+      <div class="version">v1.3.0</div>
+      
+      <!-- Debug info (hidden by default) -->
+      <div id="debugInfo"></div>
     </div>
   </div>
   
@@ -283,17 +293,84 @@
   <script src="/auth-connector.js"></script>
   
   <script>
-    // Get DOM elements
+    // DOM elements
     const loginForm = document.getElementById('loginForm');
     const loginBtn = document.getElementById('loginBtn');
     const loginLoader = document.getElementById('loginLoader');
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     const alertBox = document.getElementById('alert');
+    const debugInfo = document.getElementById('debugInfo');
+    
+    // Enable debug mode with URL parameter ?debug=true
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugMode = urlParams.get('debug') === 'true';
+    
+    if (debugMode) {
+      debugInfo.style.display = 'block';
+      debugInfo.innerHTML = `
+        <p>Debug Mode Enabled</p>
+        <p>Hostname: ${window.location.hostname}</p>
+        <p>Environment: ${window.location.hostname.includes('netlify') ? 'Netlify' : 
+                          window.location.hostname.includes('replit') ? 'Replit' : 'Local'}</p>
+      `;
+    }
+    
+    // Enable console logging all requests and responses in debug mode
+    if (debugMode) {
+      const originalFetch = window.fetch;
+      window.fetch = async function(...args) {
+        console.log('Fetch Request:', args);
+        try {
+          const response = await originalFetch(...args);
+          const responseClone = response.clone();
+          try {
+            const data = await responseClone.json();
+            console.log('Fetch Response:', data);
+          } catch (e) {
+            console.log('Fetch Response: (not JSON)');
+          }
+          return response;
+        } catch (error) {
+          console.error('Fetch Error:', error);
+          throw error;
+        }
+      };
+    }
     
     // Check if user is already logged in
     document.addEventListener('DOMContentLoaded', function() {
-      // Redirect to dashboard if already logged in
-      window.MyngendaAuth.redirectToDashboard();
+      try {
+        // Redirect to dashboard if already logged in
+        if (window.MyngendaAuth && window.MyngendaAuth.isAuthenticated()) {
+          // Get user data to determine role
+          const userData = window.MyngendaAuth.getCurrentUser();
+          
+          if (userData && userData.role === 'admin') {
+            if (debugMode) {
+              debugInfo.innerHTML += `<p>Redirecting admin to dashboard...</p>`;
+              setTimeout(() => {
+                window.location.href = '/admin/dashboard.html';
+              }, 2000);
+            } else {
+              window.location.href = '/admin/dashboard.html';
+            }
+          } else {
+            if (debugMode) {
+              debugInfo.innerHTML += `<p>Redirecting user to home...</p>`;
+              setTimeout(() => {
+                window.location.href = '/user/home.html';
+              }, 2000);
+            } else {
+              window.location.href = '/user/home.html';
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking authentication status:', error);
+        if (debugMode) {
+          debugInfo.innerHTML += `<p>Error: ${error.message}</p>`;
+        }
+      }
     });
     
     // Handle login form submission
@@ -308,8 +385,16 @@
       loginLoader.style.display = 'inline-block';
       alertBox.style.display = 'none';
       
+      if (debugMode) {
+        debugInfo.innerHTML += `<p>Attempting login for: ${email}...</p>`;
+      }
+      
       try {
         // Use the authentication connector to log in
+        if (!window.MyngendaAuth) {
+          throw new Error('Auth connector not available');
+        }
+        
         const result = await window.MyngendaAuth.login(email, password);
         
         if (result.success) {
@@ -318,9 +403,12 @@
           alertBox.className = 'alert alert-success';
           alertBox.style.display = 'block';
           
+          if (debugMode) {
+            debugInfo.innerHTML += `<p>Login successful! User role: ${result.user?.role || 'unknown'}</p>`;
+          }
+          
           // Redirect to the appropriate dashboard based on user role
           setTimeout(() => {
-            // Check user role
             const userData = window.MyngendaAuth.getCurrentUser();
             
             if (userData && userData.role === 'admin') {
@@ -335,6 +423,10 @@
           alertBox.className = 'alert alert-error';
           alertBox.style.display = 'block';
           
+          if (debugMode) {
+            debugInfo.innerHTML += `<p>Login failed: ${result.message || 'Unknown error'}</p>`;
+          }
+          
           // Reset loading state
           loginBtn.disabled = false;
           loginLoader.style.display = 'none';
@@ -347,6 +439,10 @@
         alertBox.className = 'alert alert-error';
         alertBox.style.display = 'block';
         
+        if (debugMode) {
+          debugInfo.innerHTML += `<p>Error: ${error.message}</p>`;
+        }
+        
         // Reset loading state
         loginBtn.disabled = false;
         loginLoader.style.display = 'none';
@@ -355,6 +451,9 @@
     
     // Handle Google login
     googleLoginBtn.addEventListener('click', function() {
+      if (debugMode) {
+        debugInfo.innerHTML += `<p>Redirecting to Google auth...</p>`;
+      }
       window.location.href = '/api/auth/google';
     });
   </script>
