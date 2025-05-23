@@ -12,7 +12,7 @@ window.MyngendaAPI = (function() {
   const USER_KEY = 'myngenda_user_data';
   
   // Your Replit backend URL - update this to match your actual deployment
-  const API_BASE_URL = 'https://myngenda-app.replit.app';
+  const API_BASE_URL = 'https://myngenda.replit.app';
   
   // Store user data and token
   function storeAuthData(user, token) {
