@@ -19,48 +19,26 @@ export function setupCors(app: Express) {
     'https://www.myngenda.com'
   ];
 
-  // Wildcard patterns for allowed origin domains
-  const allowedPatterns = [
-    /^https:\/\/[a-z0-9-]+--myngendapp\.netlify\.app$/,  // Netlify deploy previews
-    /^https:\/\/deploy-preview-[0-9]+--myngendapp\.netlify\.app$/,  // Netlify deploy previews
-    /^https:\/\/myngenda-[a-z0-9-]+\.netlify\.app$/  // Other Netlify subdomains
-  ];
-
   // Configure CORS to allow credentials and proper headers
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     
-    // Log the request origin for debugging
-    console.log('Incoming request from origin:', origin);
-    
-    let allowOrigin = false;
-    
-    // Check if the origin is in our allowed list
-    if (origin) {
-      // Check against specific origins first
-      if (allowedOrigins.includes(origin)) {
-        allowOrigin = true;
-      } else {
-        // Check against patterns
-        for (const pattern of allowedPatterns) {
-          if (pattern.test(origin)) {
-            allowOrigin = true;
-            break;
-          }
-        }
-      }
-      
-      // If we're in development, we might want to be more permissive
-      if (process.env.NODE_ENV === 'development') {
-        allowOrigin = true;
-        console.log('Development mode: allowing all origins');
-      }
-      
-      if (allowOrigin) {
+    // In development, allow all origins
+    if (process.env.NODE_ENV === 'development') {
+      if (origin) {
         res.header('Access-Control-Allow-Origin', origin);
-        console.log(`CORS: Allowed origin ${origin}`);
       } else {
-        console.log(`CORS: Rejected origin ${origin}`);
+        res.header('Access-Control-Allow-Origin', '*');
+      }
+    } else {
+      // In production, check against the allowed list
+      if (origin && allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+      } else if (origin && 
+                (origin.includes('netlify.app') || 
+                 origin.includes('myngenda.com'))) {
+        // Allow Netlify deploy previews and subdomains
+        res.header('Access-Control-Allow-Origin', origin);
       }
     }
     
@@ -76,48 +54,6 @@ export function setupCors(app: Express) {
     
     next();
   });
-  
-  // Apply specific CORS for API endpoints
-  const apiCorsOptions = {
-    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      let allow = false;
-      
-      // Check against specific origins
-      if (allowedOrigins.includes(origin)) {
-        allow = true;
-      } else {
-        // Check against patterns
-        for (const pattern of allowedPatterns) {
-          if (pattern.test(origin)) {
-            allow = true;
-            break;
-          }
-        }
-      }
-      
-      // Allow all in development
-      if (process.env.NODE_ENV === 'development') {
-        allow = true;
-      }
-      
-      if (allow) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'), false);
-      }
-    },
-    credentials: true,
-    maxAge: 86400 // Cache preflight for 1 day
-  };
-  
-  // Apply to API routes
-  app.use('/api', cors(apiCorsOptions));
-  
-  // Handle preflight specifically for API routes
-  app.options('/api/*', cors(apiCorsOptions));
   
   console.log('Enhanced CORS configuration complete');
 }
