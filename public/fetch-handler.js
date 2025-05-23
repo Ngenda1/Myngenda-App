@@ -10,11 +10,8 @@ window.myngendaAPI = {
   // Main fetch handler that works in all environments
   fetch: async function(endpoint, options = {}) {
     try {
-      // Use local API endpoints - Netlify _redirects will proxy to Replit
-      // This avoids CORS issues completely
+      // Ensure we get the base URL correctly
       const baseUrl = window.location.origin;
-      
-      // Ensure proper URL formatting
       const url = endpoint.startsWith('/') 
         ? `${baseUrl}${endpoint}` 
         : `${baseUrl}/${endpoint}`;
@@ -44,15 +41,6 @@ window.myngendaAPI = {
       const token = localStorage.getItem('auth_token');
       if (token) {
         mergedOptions.headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      // Add custom header to help identify the origin
-      mergedOptions.headers['X-Myngenda-Client'] = 'production';
-      
-      // This is needed for CORS to work with credentials
-      if (mergedOptions.credentials === 'include') {
-        // Make sure withCredentials is set for XMLHttpRequest based fetch
-        mergedOptions.withCredentials = true;
       }
       
       // Add abort controller with timeout

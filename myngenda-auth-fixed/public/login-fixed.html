@@ -135,9 +135,60 @@
       margin-bottom: 20px;
       display: none;
     }
+
+    /* Loading animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid var(--light-gray);
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .success-message {
+      background-color: #e8f5e9;
+      color: var(--success-color);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Connecting to server...</div>
+  </div>
+  
   <div class="login-container">
     <div class="login-form-container">
       <div class="login-header">
@@ -146,6 +197,7 @@
       </div>
       
       <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
       
       <form id="loginForm">
         <div class="form-group">
@@ -163,7 +215,7 @@
       
       <div style="margin-top: 25px; text-align: center;">
         <p style="color: #666; margin-bottom: 15px;">Or sign in with</p>
-        <a href="/api/auth/google?redirect=/user/home" style="display: inline-block;">
+        <a href="#" id="googleAuthBtn" style="display: inline-block;">
           <img src="icons/google-logo.png" 
                alt="Sign in with Google" style="height: 40px; width: auto;">
         </a>
@@ -175,10 +227,58 @@
     </div>
   </div>
   
-  <!-- Load our reliable API handler -->
-  <script src="/fetch-handler.js"></script>
+  <!-- Load our enhanced authentication system -->
+  <script src="auth-handler.js"></script>
   
   <script>
+    // Check if user just registered
+    document.addEventListener('DOMContentLoaded', function() {
+      if (sessionStorage.getItem('just_registered') === 'true') {
+        sessionStorage.removeItem('just_registered');
+        showSuccessMessage('Registration successful! Redirecting to dashboard...');
+        
+        // Auto redirect to dashboard
+        setTimeout(() => {
+          window.MyngendaAPI.redirectToDashboard();
+        }, 1500);
+      }
+      
+      // Check for login errors
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        showErrorMessage(decodeURIComponent(error));
+      }
+      
+      // Setup Google auth button
+      document.getElementById('googleAuthBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.MyngendaAPI.googleAuth();
+      });
+    });
+    
+    function showErrorMessage(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    function showSuccessMessage(message) {
+      const successMessage = document.getElementById('successMessage');
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+    
     document.getElementById('loginForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       
@@ -186,10 +286,11 @@
       errorMessage.style.display = 'none';
       
       // Show loading indicator
+      showLoading();
+      
       const submitButton = event.target.querySelector('button[type="submit"]');
       const originalText = submitButton.textContent;
       submitButton.disabled = true;
-      submitButton.textContent = 'Signing in...';
       
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -197,46 +298,24 @@
       try {
         console.log('Attempting to log in with:', email);
         
-        // Use our reliable API handler
-        const { response, data } = await window.myngendaAPI.login(email, password);
+        // Use our direct API connection
+        const result = await window.MyngendaAPI.login(email, password);
         
-        console.log('Login response:', data);
+        console.log('Login successful:', result.user);
         
-        if (response.ok) {
-          // Show success message
-          const successMessage = document.createElement('div');
-          successMessage.style.backgroundColor = '#e8f5e9';
-          successMessage.style.color = '#2e7d32';
-          successMessage.style.padding = '12px';
-          successMessage.style.borderRadius = '4px';
-          successMessage.style.marginBottom = '20px';
-          successMessage.style.textAlign = 'center';
-          successMessage.innerHTML = '<strong>Login successful!</strong><br>Redirecting to dashboard...';
-          
-          errorMessage.parentNode.insertBefore(successMessage, errorMessage);
-          
-          // Redirect to dashboard
-          setTimeout(() => {
-            window.location.href = '/user/home';
-          }, 1000);
-        } else {
-          // Show error message
-          errorMessage.textContent = data.message || 'Invalid email or password';
-          errorMessage.style.display = 'block';
-          
-          // Reset button
-          submitButton.disabled = false;
-          submitButton.textContent = originalText;
-        }
+        // Show success message
+        showSuccessMessage('Login successful! Redirecting to dashboard...');
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.MyngendaAPI.redirectToDashboard();
+        }, 1500);
       } catch (error) {
         console.error('Login error:', error);
         
-        // Show better error message
-        errorMessage.innerHTML = `
-          <strong>Connection problem!</strong><br>
-          ${error.message || 'Could not connect to the server. Please check your internet connection and try again.'}
-        `;
-        errorMessage.style.display = 'block';
+        // Hide loading and show error message
+        hideLoading();
+        showErrorMessage(error.message || 'Invalid email or password');
         
         // Reset button
         submitButton.disabled = false;

@@ -227,9 +227,50 @@
       height: 18px;
       margin-right: 10px;
     }
+    
+    /* Loading animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid var(--light-gray);
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Creating your account...</div>
+  </div>
+  
   <div class="register-container">
     <div class="register-form-container">
       <div class="register-header">
@@ -240,7 +281,7 @@
       <div id="errorMessage" class="error-message"></div>
       <div id="successMessage" class="success-message">
         <h3>Registration Successful!</h3>
-        <p>Your account has been created. You will be redirected to the login page shortly.</p>
+        <p>Your account has been created. You will be redirected to the dashboard shortly.</p>
       </div>
       
       <form id="registerForm">
@@ -302,7 +343,7 @@
           <span>OR</span>
         </div>
         
-        <a href="/api/auth/google?redirect=/user/home" class="google-button">
+        <a href="#" id="googleAuthBtn" class="google-button">
           <img src="icons/google-logo.png" alt="Google" class="google-icon">
           <span>Sign up with Google</span>
         </a>
@@ -314,8 +355,8 @@
     </div>
   </div>
   
-  <!-- Load our reliable API handler -->
-  <script src="/fetch-handler.js"></script>
+  <!-- Load our enhanced authentication system -->
+  <script src="auth-handler.js"></script>
   
   <script>
     // Show/hide Google sign-in based on account type
@@ -334,38 +375,65 @@
     document.addEventListener('DOMContentLoaded', function() {
       const accountTypeEvent = new Event('change');
       document.getElementById('accountType').dispatchEvent(accountTypeEvent);
+      
+      // Check for registration errors
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        showErrorMessage(decodeURIComponent(error));
+      }
+      
+      // Setup Google auth button
+      document.getElementById('googleAuthBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.MyngendaAPI.googleAuth();
+      });
     });
     
-    // Update Google auth link to use our reliable handler
-    document.querySelector('.google-button').addEventListener('click', function(e) {
-      e.preventDefault();
-      window.myngendaAPI.googleAuth();
-    });
+    function showErrorMessage(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    function showSuccessMessage() {
+      document.getElementById('successMessage').style.display = 'block';
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('googleSignIn').style.display = 'none';
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
   
     document.getElementById('registerForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       
       const errorMessage = document.getElementById('errorMessage');
-      const successMessage = document.getElementById('successMessage');
-      
       errorMessage.style.display = 'none';
-      successMessage.style.display = 'none';
+      
+      // Show loading indicator
+      showLoading();
       
       // Show loading indicator
       const submitButton = event.target.querySelector('button[type="submit"]');
       const originalText = submitButton.textContent;
       submitButton.disabled = true;
-      submitButton.textContent = 'Creating Account...';
       
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       
       // Validate passwords match
       if (password !== confirmPassword) {
-        errorMessage.textContent = 'Passwords do not match';
-        errorMessage.style.display = 'block';
+        hideLoading();
+        showErrorMessage('Passwords do not match');
         submitButton.disabled = false;
-        submitButton.textContent = originalText;
         return;
       }
       
@@ -380,44 +448,35 @@
       };
       
       try {
-        console.log('Attempting to register with data:', formData);
+        console.log('Attempting to register with data:', {
+          ...formData,
+          password: '[REDACTED]'
+        });
         
-        // Use our reliable API handler
-        const { response, data } = await window.myngendaAPI.register(formData);
+        // Use our enhanced API connection
+        const result = await window.MyngendaAPI.register(formData);
         
-        if (!response.ok) {
-          errorMessage.textContent = data.message || 'Registration failed. Please try again.';
-          errorMessage.style.display = 'block';
-          submitButton.disabled = false;
-          submitButton.textContent = originalText;
-          return;
-        }
-        
-        console.log('Registration successful:', data);
+        console.log('Registration successful');
         
         // Show success message
-        successMessage.style.display = 'block';
-        document.getElementById('registerForm').reset();
+        hideLoading();
+        showSuccessMessage();
+        
+        // Store login data immediately in session storage for seamless user experience
+        sessionStorage.setItem('just_registered', 'true');
         
         // Redirect to dashboard after short delay
         setTimeout(() => {
-          window.location.href = '/user/home';
-        }, 2000);
+          window.MyngendaAPI.redirectToDashboard();
+        }, 2500);
       } catch (error) {
         console.error('Registration error:', error);
         
-        // More detailed error message with troubleshooting help
-        errorMessage.innerHTML = `
-          <p><strong>Connection issue detected.</strong></p>
-          <p>${error.message || 'We\'re having trouble connecting to our servers.'} This might be due to:</p>
-          <ul style="text-align: left; margin-bottom: 10px;">
-            <li>Temporary server maintenance</li>
-            <li>Network connectivity issues</li>
-            <li>Firewall or security settings</li>
-          </ul>
-          <p>Please try again in a few moments or contact support if this persists.</p>
-        `;
-        errorMessage.style.display = 'block';
+        // Hide loading and show error message
+        hideLoading();
+        showErrorMessage(error.message || 'Registration failed. Please try again.');
+        
+        // Reset button
         submitButton.disabled = false;
         submitButton.textContent = originalText;
       }
