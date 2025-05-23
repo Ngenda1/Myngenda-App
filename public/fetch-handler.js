@@ -1,88 +1,146 @@
 /**
- * Myngenda Enhanced Fetch Handler
+ * Myngenda API Connection Handler
  * 
- * This module provides enhanced fetch capabilities for making API requests
- * to the Myngenda backend with proper authentication.
+ * This script creates a reliable connection bridge between the frontend and backend
+ * to solve persistent authentication issues with fetch() requests.
  */
 
-// Create a namespace for our fetch utilities
-window.MyngendaFetch = (function() {
-  // Your Replit backend URL - update this when deploying
-  const API_BASE_URL = 'https://myngenda.replit.app';
-  
-  // Helper function to get auth token
-  function getAuthToken() {
-    return localStorage.getItem('auth_token') || localStorage.getItem('myngenda_auth_token');
-  }
-  
-  // Fetch helper with authentication
-  async function authFetch(endpoint, options = {}) {
+// This script is injected into all HTML pages to provide a global connection handler
+window.myngendaAPI = {
+  // Main fetch handler that works in all environments
+  fetch: async function(endpoint, options = {}) {
     try {
-      // Build the full URL
-      const url = endpoint.startsWith('http') 
-        ? endpoint 
-        : `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+      // Use local API endpoints - Netlify _redirects will proxy to Replit
+      // This avoids CORS issues completely
+      const baseUrl = window.location.origin;
       
-      // Prepare headers
-      const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers
+      // Ensure proper URL formatting
+      const url = endpoint.startsWith('/') 
+        ? `${baseUrl}${endpoint}` 
+        : `${baseUrl}/${endpoint}`;
+      
+      // Default options with better credentials handling
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        credentials: 'include',
+        mode: 'cors'
       };
       
-      // Add auth token if available
-      const token = getAuthToken();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      // Make the request
-      const response = await fetch(url, {
+      // Merge options with defaults
+      const mergedOptions = {
+        ...defaultOptions,
         ...options,
-        headers,
-        credentials: 'include'
-      });
+        headers: {
+          ...defaultOptions.headers,
+          ...(options.headers || {})
+        }
+      };
       
-      // Handle unauthorized
-      if (response.status === 401) {
-        // Clear token and redirect to login
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('myngenda_auth_token');
-        window.location.href = '/login.html';
-        return null;
+      // Add auth token from localStorage if available
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        mergedOptions.headers['Authorization'] = `Bearer ${token}`;
       }
       
-      // Parse JSON if available
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        return await response.json();
+      // Add custom header to help identify the origin
+      mergedOptions.headers['X-Myngenda-Client'] = 'production';
+      
+      // This is needed for CORS to work with credentials
+      if (mergedOptions.credentials === 'include') {
+        // Make sure withCredentials is set for XMLHttpRequest based fetch
+        mergedOptions.withCredentials = true;
       }
       
+      // Add abort controller with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+      mergedOptions.signal = controller.signal;
+      
+      console.log(`Making API request to: ${url}`, mergedOptions);
+      
+      // Make the actual fetch request
+      const response = await fetch(url, mergedOptions);
+      clearTimeout(timeoutId);
+      
+      // Log the response status
+      console.log(`API response status: ${response.status}`);
+      
+      // Return the response
       return response;
     } catch (error) {
-      console.error('API request failed:', error);
+      // Handle network errors better
+      console.error('API connection error:', error);
+      
+      // Convert AbortError into a more user-friendly message
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. The server is taking too long to respond.');
+      }
+      
       throw error;
     }
-  }
+  },
+  
+  // Login helper
+  login: async function(email, password) {
+    const response = await this.fetch('/api/token/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.token) {
+      localStorage.setItem('auth_token', data.token);
+    }
+    
+    return { response, data };
+  },
+  
+  // Registration helper
+  register: async function(userData) {
+    const response = await this.fetch('/api/token/register', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.token) {
+      localStorage.setItem('auth_token', data.token);
+    }
+    
+    return { response, data };
+  },
   
   // Google auth helper
-  function googleAuth() {
-    // Save current path for redirect after auth
+  googleAuth: function() {
+    // Store the current page to redirect back after auth
     localStorage.setItem('auth_redirect', window.location.pathname);
     
     // Redirect to Google auth with a returnTo parameter
-    window.location.href = `${API_BASE_URL}/api/auth/google?returnTo=${encodeURIComponent(window.location.pathname)}`;
-  }
+    window.location.href = `/api/auth/google?returnTo=${encodeURIComponent(window.location.pathname)}`;
+  },
   
   // Logout helper
-  function logout() {
+  logout: function() {
     localStorage.removeItem('auth_token');
-    localStorage.removeItem('myngenda_auth_token');
     window.location.href = '/login.html';
   }
-  
-  // Return public methods
-  return {
-    fetch: authFetch,
-    googleAuth,
-    logout
-  };
-})();
+};
+
+// Listen for messages from the Google auth callback
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'AUTH_SUCCESS' && event.data.token) {
+    localStorage.setItem('auth_token', event.data.token);
+    
+    // Get stored redirect or default to dashboard
+    const redirect = localStorage.getItem('auth_redirect') || '/user/home';
+    localStorage.removeItem('auth_redirect');
+    
+    window.location.href = redirect;
+  }
+});
