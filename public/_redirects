@@ -1,3 +1,3 @@
 # Netlify redirects file - proxies all API requests to Replit
-/api/*  https://myngenda-app.replit.app/api/:splat  200!
+/api/*  https://myngenda.replit.app/api/:splat  200!
 /*      /index.html                                 200
