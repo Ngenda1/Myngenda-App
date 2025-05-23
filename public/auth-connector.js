@@ -25,7 +25,7 @@ function detectApiBaseUrl() {
       window.location.hostname === 'myngenda.com' ||
       window.location.hostname === 'www.myngenda.com') {
     // Make sure this points to your actual Replit app URL
-    return 'https://myngenda-app.replit.app'; 
+    return 'https://myngenda.replit.app'; 
   }
   
   // Local development
@@ -35,7 +35,7 @@ function detectApiBaseUrl() {
   }
   
   // Default to Replit production API for unknown environments
-  return 'https://myngenda-app.replit.app';
+  return 'https://myngenda.replit.app';
 }
 
 /**
