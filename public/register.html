@@ -3,43 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Myngenda</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" href="/icons/myngenda-icon.png">
+  <title>Myngenda Registration</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
-    :root {
-      --primary-color: #43a047;
-      --primary-dark: #2e7d32;
-      --primary-light: #76d275;
-      --text-dark: #333;
-      --text-light: #fafafa;
-      --background-light: #f5f5f5;
-      --error-color: #d32f2f;
-      --success-color: #388e3c;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--background-light);
-      color: var(--text-dark);
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px 0;
+      color: #333;
     }
     
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 600px;
       padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .header img {
+      height: 60px;
+      margin-right: 15px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      color: #43a047;
+      font-size: 28px;
     }
     
     .card {
@@ -47,396 +46,462 @@
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       padding: 30px;
-      width: 100%;
-    }
-    
-    .logo {
-      text-align: center;
       margin-bottom: 20px;
     }
     
-    .logo img {
-      width: 80px;
-      margin-bottom: 10px;
-    }
-    
-    .logo h1 {
-      color: var(--primary-color);
+    h2 {
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 20px;
       font-size: 24px;
-      margin-bottom: 5px;
-    }
-    
-    .logo p {
-      color: #666;
-      font-size: 14px;
-    }
-    
-    form {
-      margin-bottom: 20px;
-    }
-    
-    .form-row {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
     }
     
     .form-group {
-      margin-bottom: 15px;
-      flex: 1;
+      margin-bottom: 20px;
     }
     
     label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
       font-weight: 500;
-      color: #555;
     }
     
-    input, select {
+    input,
+    select {
       width: 100%;
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 4px;
-      font-size: 14px;
-      transition: border-color 0.3s;
+      font-size: 16px;
+      transition: border 0.3s;
     }
     
-    input:focus, select:focus {
-      border-color: var(--primary-color);
+    input:focus,
+    select:focus {
+      border-color: #43a047;
       outline: none;
     }
     
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-    
-    .checkbox-group input {
-      width: auto;
-      margin-right: 10px;
-    }
-    
     button {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary-color);
+      background-color: #43a047;
       color: white;
       border: none;
+      padding: 12px 20px;
       border-radius: 4px;
-      font-size: 16px;
-      font-weight: 600;
       cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
       transition: background-color 0.3s;
+      width: 100%;
     }
     
     button:hover {
-      background-color: var(--primary-dark);
+      background-color: #2e7d32;
     }
     
-    button:disabled {
-      background-color: #aaa;
-      cursor: not-allowed;
+    .message {
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+      display: none;
     }
     
-    .links {
-      text-align: center;
-      margin-top: 20px;
+    .success {
+      background-color: #dff0d8;
+      color: #3c763d;
+      border: 1px solid #d6e9c6;
+    }
+    
+    .error {
+      background-color: #f2dede;
+      color: #a94442;
+      border: 1px solid #ebccd1;
+    }
+    
+    .password-container {
+      position: relative;
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 12px;
+      cursor: pointer;
+      color: #777;
+    }
+    
+    .toggle-password:hover {
+      color: #333;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    /* Form validation styling */
+    .form-group.error input {
+      border-color: #a94442;
+    }
+    
+    .form-group .error-text {
+      color: #a94442;
       font-size: 14px;
+      margin-top: 5px;
+      display: none;
     }
     
-    .links a {
-      color: var(--primary-color);
-      text-decoration: none;
+    .form-group.error .error-text {
+      display: block;
     }
     
-    .links a:hover {
-      text-decoration: underline;
-    }
-    
+    /* Social login buttons */
     .social-login {
       margin-top: 20px;
       text-align: center;
     }
     
-    .social-login p {
-      margin-bottom: 15px;
-      font-size: 14px;
-      color: #666;
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 15px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      margin: 0 10px;
+      transition: all 0.3s;
+    }
+    
+    .google-btn {
+      background-color: #ffffff;
+      color: #444;
+      border: 1px solid #ddd;
+    }
+    
+    .google-btn:hover {
+      background-color: #f1f1f1;
+    }
+    
+    .google-btn i {
+      color: #DB4437;
+      margin-right: 10px;
+    }
+    
+    .divider {
+      margin: 20px 0;
+      text-align: center;
       position: relative;
     }
     
-    .social-login p::before,
-    .social-login p::after {
-      content: '';
+    .divider::before,
+    .divider::after {
+      content: "";
       position: absolute;
       top: 50%;
-      width: 35%;
+      width: 45%;
       height: 1px;
       background-color: #ddd;
     }
     
-    .social-login p::before {
+    .divider::before {
       left: 0;
     }
     
-    .social-login p::after {
+    .divider::after {
       right: 0;
     }
     
-    .google-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .divider span {
       background-color: white;
-      color: #555;
-      border: 1px solid #ddd;
-      padding: 10px 15px;
-      border-radius: 4px;
-      font-weight: 500;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s;
+      padding: 0 10px;
+      position: relative;
+      z-index: 1;
+      color: #777;
     }
     
-    .google-btn:hover {
-      background-color: #f5f5f5;
-    }
-    
-    .google-btn i {
-      margin-right: 10px;
-      color: #ea4335;
-    }
-    
-    .alert {
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      display: none;
-    }
-    
-    .alert-error {
-      background-color: #ffebee;
-      color: var(--error-color);
-      display: block;
-    }
-    
-    .alert-success {
-      background-color: #e8f5e9;
-      color: var(--success-color);
-      display: block;
-    }
-    
-    .loader {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
-      display: none;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .version {
+    .login-link {
       text-align: center;
-      font-size: 12px;
-      color: #999;
-      margin-top: 15px;
+      margin-top: 20px;
+    }
+    
+    .login-link a {
+      color: #43a047;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .social-btn {
+        display: block;
+        margin: 10px 0;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
+    <div class="header">
+      <img src="/icons/myngenda-icon.png" alt="Myngenda logo" onerror="this.src='/public/icon.png'">
+      <h1>Myngenda</h1>
+    </div>
+    
     <div class="card">
-      <div class="logo">
-        <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='https://via.placeholder.com/80?text=M'">
-        <h1>Myngenda</h1>
-        <p>Create your account</p>
-      </div>
-      
-      <div id="alert" class="alert"></div>
-      
+      <h2>Create an Account</h2>
       <form id="registerForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" name="firstName" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" required>
-          </div>
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" required>
+          <div class="error-text">Please enter your first name</div>
         </div>
         
         <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required>
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" required>
+          <div class="error-text">Please enter your last name</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+          <div class="error-text">Please enter a valid email address</div>
         </div>
         
         <div class="form-group">
           <label for="phoneNumber">Phone Number</label>
-          <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Optional">
+          <input type="text" id="phoneNumber" required>
+          <div class="error-text">Please enter a valid phone number</div>
         </div>
         
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required>
+          <div class="password-container">
+            <input type="password" id="password" required>
+            <i class="toggle-password fas fa-eye" onclick="togglePasswordVisibility('password', this)"></i>
+            <div class="error-text">Password must be at least 6 characters</div>
+          </div>
         </div>
         
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" required>
+          <div class="password-container">
+            <input type="password" id="confirmPassword" required>
+            <i class="toggle-password fas fa-eye" onclick="togglePasswordVisibility('confirmPassword', this)"></i>
+            <div class="error-text">Passwords do not match</div>
+          </div>
         </div>
         
         <div class="form-group">
-          <label for="role">Account Type</label>
-          <select id="role" name="role" required>
-            <option value="customer">Customer</option>
+          <label for="role">Role</label>
+          <select id="role">
+            <option value="user">User</option>
             <option value="driver">Driver</option>
           </select>
         </div>
         
-        <div class="checkbox-group">
-          <input type="checkbox" id="terms" name="terms" required>
-          <label for="terms">I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a></label>
-        </div>
-        
-        <button type="submit" id="registerBtn">
-          Create Account
-          <span id="registerLoader" class="loader"></span>
-        </button>
+        <button type="submit">Register</button>
+        <div id="registerMessage" class="message"></div>
       </form>
       
-      <div class="links">
-        <p>Already have an account? <a href="login.html">Log In</a></p>
+      <div class="divider">
+        <span>OR</span>
       </div>
       
       <div class="social-login">
-        <p>Or</p>
-        <button id="googleRegisterBtn" class="google-btn">
+        <a href="#" class="social-btn google-btn" onclick="googleAuth()">
           <i class="fab fa-google"></i> Register with Google
-        </button>
+        </a>
       </div>
       
-      <div class="version">v1.2.0</div>
+      <div class="login-link">
+        Already have an account? <a href="/login.html">Login</a>
+      </div>
     </div>
   </div>
   
-  <!-- Include the auth connector script -->
   <script src="/auth-connector.js"></script>
-  
   <script>
-    // Get DOM elements
-    const registerForm = document.getElementById('registerForm');
-    const registerBtn = document.getElementById('registerBtn');
-    const registerLoader = document.getElementById('registerLoader');
-    const googleRegisterBtn = document.getElementById('googleRegisterBtn');
-    const alertBox = document.getElementById('alert');
+    // Toggle password visibility
+    function togglePasswordVisibility(inputId, icon) {
+      const input = document.getElementById(inputId);
+      const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+      input.setAttribute('type', type);
+      
+      // Toggle the eye icon
+      if (type === 'text') {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
     
-    // Check if user is already logged in
+    // Show error message
+    function showMessage(message, type) {
+      const messageElement = document.getElementById('registerMessage');
+      messageElement.textContent = message;
+      messageElement.className = 'message ' + type;
+      messageElement.style.display = 'block';
+      
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        messageElement.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Validate form
+    function validateForm() {
+      let isValid = true;
+      
+      // Remove all error classes
+      document.querySelectorAll('.form-group').forEach(group => {
+        group.classList.remove('error');
+      });
+      
+      // Validate first name
+      const firstName = document.getElementById('firstName');
+      if (firstName.value.trim() === '') {
+        firstName.parentElement.classList.add('error');
+        isValid = false;
+      }
+      
+      // Validate last name
+      const lastName = document.getElementById('lastName');
+      if (lastName.value.trim() === '') {
+        lastName.parentElement.classList.add('error');
+        isValid = false;
+      }
+      
+      // Validate email
+      const email = document.getElementById('email');
+      if (!isValidEmail(email.value)) {
+        email.parentElement.classList.add('error');
+        isValid = false;
+      }
+      
+      // Validate phone number
+      const phoneNumber = document.getElementById('phoneNumber');
+      if (phoneNumber.value.trim() === '') {
+        phoneNumber.parentElement.classList.add('error');
+        isValid = false;
+      }
+      
+      // Validate password
+      const password = document.getElementById('password');
+      if (password.value.length < 6) {
+        password.parentElement.parentElement.classList.add('error');
+        isValid = false;
+      }
+      
+      // Validate confirm password
+      const confirmPassword = document.getElementById('confirmPassword');
+      if (password.value !== confirmPassword.value) {
+        confirmPassword.parentElement.parentElement.classList.add('error');
+        isValid = false;
+      }
+      
+      return isValid;
+    }
+    
+    // Validate email format
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    // Google authentication
+    function googleAuth() {
+      if (window.MyngendaAuth && window.MyngendaAuth.googleAuth) {
+        window.MyngendaAuth.googleAuth();
+      } else {
+        console.error('Google auth function not available');
+        showMessage('Google authentication is not available', 'error');
+      }
+    }
+    
+    // Initialize the forms
     document.addEventListener('DOMContentLoaded', function() {
-      // Redirect to dashboard if already logged in
-      window.MyngendaAuth.redirectToDashboard();
-    });
-    
-    // Handle registration form submission
-    registerForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
+      // Password field validation on input
+      const password = document.getElementById('password');
+      const confirmPassword = document.getElementById('confirmPassword');
       
-      const firstName = document.getElementById('firstName').value;
-      const lastName = document.getElementById('lastName').value;
-      const email = document.getElementById('email').value;
-      const phoneNumber = document.getElementById('phoneNumber').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const role = document.getElementById('role').value;
-      const termsChecked = document.getElementById('terms').checked;
-      
-      // Basic validation
-      if (password !== confirmPassword) {
-        alertBox.textContent = 'Passwords do not match';
-        alertBox.className = 'alert alert-error';
-        alertBox.style.display = 'block';
-        return;
-      }
-      
-      if (!termsChecked) {
-        alertBox.textContent = 'You must agree to the Terms of Service and Privacy Policy';
-        alertBox.className = 'alert alert-error';
-        alertBox.style.display = 'block';
-        return;
-      }
-      
-      // Show loading state
-      registerBtn.disabled = true;
-      registerLoader.style.display = 'inline-block';
-      alertBox.style.display = 'none';
-      
-      try {
-        // Use the authentication connector to register
-        const result = await window.MyngendaAuth.register({
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-          password,
-          role
-        });
-        
-        if (result.success) {
-          // Show success message
-          alertBox.textContent = 'Registration successful! Redirecting...';
-          alertBox.className = 'alert alert-success';
-          alertBox.style.display = 'block';
-          
-          // Redirect to the appropriate dashboard based on user role
-          setTimeout(() => {
-            // Check user role
-            const userData = window.MyngendaAuth.getCurrentUser();
-            
-            if (userData && userData.role === 'admin') {
-              window.location.href = '/admin/dashboard.html';
-            } else {
-              window.location.href = '/user/home.html';
-            }
-          }, 1500);
+      confirmPassword.addEventListener('input', function() {
+        if (password.value !== confirmPassword.value) {
+          confirmPassword.parentElement.parentElement.classList.add('error');
         } else {
-          // Show error message
-          alertBox.textContent = result.message || 'Registration failed. Please try again.';
-          alertBox.className = 'alert alert-error';
-          alertBox.style.display = 'block';
-          
-          // Reset loading state
-          registerBtn.disabled = false;
-          registerLoader.style.display = 'none';
+          confirmPassword.parentElement.parentElement.classList.remove('error');
         }
-      } catch (error) {
-        console.error('Registration error:', error);
+      });
+      
+      // Registration form submission
+      document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        // Show error message
-        alertBox.textContent = 'Connection error. Please try again.';
-        alertBox.className = 'alert alert-error';
-        alertBox.style.display = 'block';
+        if (!validateForm()) {
+          return;
+        }
         
-        // Reset loading state
-        registerBtn.disabled = false;
-        registerLoader.style.display = 'none';
+        try {
+          const result = await window.MyngendaAuth.register({
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phoneNumber: document.getElementById('phoneNumber').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+          });
+          
+          if (result.success) {
+            showMessage('Registration successful! Redirecting...', 'success');
+            setTimeout(() => {
+              window.MyngendaAuth.redirectToDashboard();
+            }, 1000);
+          } else {
+            showMessage(result.message || 'Registration failed. Please try again.', 'error');
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          showMessage('Connection error. Please try again.', 'error');
+        }
+      });
+      
+      // Check for URL parameters to show debug mode
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('debug') === 'true') {
+        console.log('Debug mode enabled');
+        console.log('Hostname:', window.location.hostname);
+        
+        // Determine environment based on hostname
+        let environment = 'Unknown';
+        if (window.location.hostname.includes('replit.app')) {
+          environment = 'Replit';
+        } else if (window.location.hostname.includes('netlify.app')) {
+          environment = 'Netlify';
+        } else if (window.location.hostname === 'myngenda.com' || window.location.hostname === 'www.myngenda.com') {
+          environment = 'Production';
+        } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          environment = 'Local';
+        }
+        
+        console.log('Environment:', environment);
       }
-    });
-    
-    // Handle Google registration
-    googleRegisterBtn.addEventListener('click', function() {
-      window.location.href = '/api/auth/google';
     });
   </script>
 </body>
