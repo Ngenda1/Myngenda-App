@@ -1,254 +1,266 @@
 /**
  * Myngenda Authentication Connector
  * 
- * This script connects your Netlify frontend to the Replit backend
- * and ensures reliable authentication across both platforms.
- * 
- * IMPORTANT: This maintains all existing functionality including Google Maps integration
+ * This module provides authentication functions for Myngenda
+ * that work for both internal and external users:
+ * - Internal users on Replit use session cookies
+ * - External users on Netlify use token-based authentication
  */
 
-// Create the API connector if it doesn't already exist
-window.MyngendaAPI = window.MyngendaAPI || (function() {
-  // Storage keys
-  const TOKEN_KEY = 'myngenda_auth_token';
-  const USER_KEY = 'myngenda_user_data';
-  
-  // Your Replit backend URL - update this to match your actual deployment
-  const API_BASE_URL = 'https://myngenda-app.replit.app';
-  
-  // Store user data and token
-  function storeAuthData(user, token) {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    return { user, token };
+// API base URL - dynamically determined based on environment
+const API_BASE_URL = detectApiBaseUrl();
+
+/**
+ * Detects the appropriate API base URL based on current environment
+ */
+function detectApiBaseUrl() {
+  // Check if we're on the same domain as the API (Replit hosting)
+  if (window.location.hostname.includes('replit')) {
+    return ''; // Same domain, use relative URLs
   }
   
-  // Clear auth data
-  function clearAuthData() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+  // Check for Netlify domain
+  if (window.location.hostname.includes('netlify.app') || 
+      window.location.hostname === 'myngenda.com' ||
+      window.location.hostname === 'www.myngenda.com') {
+    return 'https://myngenda-app.replit.app'; // External Replit API
   }
   
-  // Check if user is authenticated
-  function isAuthenticated() {
-    return !!localStorage.getItem(TOKEN_KEY);
+  // Local development
+  if (window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5000'; // Local API server
   }
   
-  // Get current user
-  function getCurrentUser() {
-    const userData = localStorage.getItem(USER_KEY);
-    if (!userData) return null;
+  // Default to Replit production API for unknown environments
+  return 'https://myngenda-app.replit.app';
+}
+
+/**
+ * Store authentication data (token and user info)
+ */
+function storeAuthData(user, token) {
+  if (token) {
+    localStorage.setItem('auth_token', token);
+  }
+  localStorage.setItem('user_data', JSON.stringify(user));
+}
+
+/**
+ * Clear authentication data (for logout)
+ */
+function clearAuthData() {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_data');
+}
+
+/**
+ * Check if user is authenticated via token
+ */
+function isAuthenticated() {
+  return !!localStorage.getItem('auth_token');
+}
+
+/**
+ * Get the current user data from localStorage
+ */
+function getCurrentUser() {
+  const userData = localStorage.getItem('user_data');
+  return userData ? JSON.parse(userData) : null;
+}
+
+/**
+ * Make an authenticated API request
+ * This automatically adds the auth token if available
+ */
+async function apiRequest(endpoint, options = {}) {
+  const token = localStorage.getItem('auth_token');
+  
+  // Ensure headers object exists
+  options.headers = options.headers || {};
+  
+  // Add token if available
+  if (token) {
+    options.headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  // Add content type for JSON requests
+  if (options.method && ['POST', 'PUT', 'PATCH'].includes(options.method)) {
+    options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+  }
+  
+  // Build full URL (handle both absolute and relative endpoints)
+  const url = endpoint.startsWith('http') 
+    ? endpoint 
+    : `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+  
+  try {
+    const response = await fetch(url, options);
     
-    try {
-      return JSON.parse(userData);
-    } catch (e) {
-      console.error('Error parsing user data', e);
+    // Handle 401 Unauthorized - redirect to login
+    if (response.status === 401) {
+      clearAuthData();
+      window.location.href = '/login.html';
       return null;
     }
-  }
-  
-  // Enhanced API request helper with better error handling and connection reliability
-  async function apiRequest(endpoint, options = {}) {
-    try {
-      const url = `${API_BASE_URL}${endpoint}`;
-      
-      // Default options
-      const defaultOptions = {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache'
-        },
-        credentials: 'include',
-        mode: 'cors'
-      };
-      
-      // Merge options
-      const mergedOptions = {
-        ...defaultOptions,
-        ...options,
-        headers: {
-          ...defaultOptions.headers,
-          ...(options.headers || {})
-        }
-      };
-      
-      // Add auth token if available
-      const token = localStorage.getItem(TOKEN_KEY);
-      if (token) {
-        mergedOptions.headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      // Add abort controller with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      mergedOptions.signal = controller.signal;
-      
-      console.log(`Making API request to: ${url}`, {
-        method: mergedOptions.method,
-        endpoint
-      });
-      
-      // Make the request
-      const response = await fetch(url, mergedOptions);
-      clearTimeout(timeoutId);
-      
-      // Handle response
-      if (response.ok) {
-        return await response.json();
-      }
-      
-      // Handle error responses
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API request failed with status: ${response.status}`);
-    } catch (error) {
-      console.error('API request error:', error);
-      
-      // Handle network errors more gracefully
-      if (error.name === 'AbortError') {
-        throw new Error('Connection timeout. Please check your internet connection and try again.');
-      } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-        throw new Error('Network error. Please check your internet connection and try again.');
-      }
-      
-      throw error;
-    }
-  }
-  
-  // Login function with retry capability
-  async function login(email, password) {
-    try {
-      // First try token login
-      let result = await apiRequest('/api/token/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      });
-      
-      if (result.success && result.token) {
-        console.log('Token login successful');
-        return storeAuthData(result.user, result.token);
-      }
-      
-      throw new Error('Login failed');
-    } catch (error) {
-      console.error('Login attempt failed:', error);
-      
-      // If first login attempt fails, try fallback method
-      try {
-        console.log('Trying fallback login method...');
-        const result = await apiRequest('/api/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ email, password })
-        });
-        
-        if (result.success && result.user) {
-          // Generate a temporary token for this session
-          const tempToken = `temp_${Date.now()}`;
-          return storeAuthData(result.user, tempToken);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback login failed:', fallbackError);
-      }
-      
-      clearAuthData();
-      throw new Error('Login failed. Please check your credentials and try again.');
-    }
-  }
-  
-  // Register function with enhanced error handling
-  async function register(userData) {
-    try {
-      // First try token registration
-      const result = await apiRequest('/api/token/register', {
-        method: 'POST',
-        body: JSON.stringify(userData)
-      });
-      
-      if (result.success && result.token) {
-        console.log('Token registration successful');
-        return storeAuthData(result.user, result.token);
-      }
-      
-      throw new Error('Registration failed');
-    } catch (error) {
-      console.error('Registration attempt failed:', error);
-      
-      // If first registration attempt fails, try fallback method
-      try {
-        console.log('Trying fallback registration method...');
-        const result = await apiRequest('/api/auth/register', {
-          method: 'POST',
-          body: JSON.stringify(userData)
-        });
-        
-        if (result.success && result.user) {
-          // Generate a temporary token for this session
-          const tempToken = `temp_${Date.now()}`;
-          return storeAuthData(result.user, tempToken);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback registration failed:', fallbackError);
-      }
-      
-      clearAuthData();
-      
-      // Better user-facing error messages
-      if (error.message.includes('already exists')) {
-        throw new Error('An account with this email already exists. Please try logging in instead.');
-      }
-      
-      throw new Error('Registration failed. Please check your information and try again.');
-    }
-  }
-  
-  // Logout function
-  function logout() {
-    // Try to call logout endpoint (won't block if it fails)
-    apiRequest('/api/auth/logout', { method: 'POST' })
-      .catch(error => console.log('Logout endpoint error, continuing with local logout', error));
     
+    // Parse JSON response
+    if (response.headers.get('content-type')?.includes('application/json')) {
+      return await response.json();
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('API request error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Log in a user (works for both internal and external users)
+ */
+async function login(email, password) {
+  try {
+    // First try token-based login (for external users)
+    const tokenResponse = await fetch(`${API_BASE_URL}/api/token/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.success) {
+      // Store token and user data
+      storeAuthData(tokenData.user, tokenData.token);
+      return { success: true, user: tokenData.user };
+    }
+    
+    // If token login fails, try session-based login (for internal users)
+    const sessionResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include' // Include cookies for session auth
+    });
+    
+    const sessionData = await sessionResponse.json();
+    
+    if (sessionData.success) {
+      // Store user data (no token for session auth)
+      storeAuthData(sessionData.user);
+      return { success: true, user: sessionData.user };
+    }
+    
+    // Both login methods failed
+    return { 
+      success: false, 
+      message: sessionData.message || tokenData.message || 'Login failed' 
+    };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, message: 'Connection error. Please try again.' };
+  }
+}
+
+/**
+ * Register a new user (works for both internal and external users)
+ */
+async function register(userData) {
+  try {
+    // First try token-based registration (for external users)
+    const tokenResponse = await fetch(`${API_BASE_URL}/api/token/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.success) {
+      // Store token and user data
+      storeAuthData(tokenData.user, tokenData.token);
+      return { success: true, user: tokenData.user };
+    }
+    
+    // If token registration fails, try session-based registration (for internal users)
+    const sessionResponse = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData),
+      credentials: 'include' // Include cookies for session auth
+    });
+    
+    const sessionData = await sessionResponse.json();
+    
+    if (sessionData.success) {
+      // Store user data (no token for session auth)
+      storeAuthData(sessionData.user);
+      return { success: true, user: sessionData.user };
+    }
+    
+    // Both registration methods failed
+    return { 
+      success: false, 
+      message: sessionData.message || tokenData.message || 'Registration failed' 
+    };
+  } catch (error) {
+    console.error('Registration error:', error);
+    return { success: false, message: 'Connection error. Please try again.' };
+  }
+}
+
+/**
+ * Log out the current user (works for both internal and external users)
+ */
+async function logout() {
+  try {
+    // For session-based auth, call logout endpoint
+    await fetch(`${API_BASE_URL}/api/auth/logout`, { 
+      credentials: 'include'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+  } finally {
+    // Always clear local storage data
     clearAuthData();
     window.location.href = '/login.html';
   }
-  
-  // Google auth function
-  function googleAuth() {
-    // Store the return URL for after auth
-    localStorage.setItem('auth_redirect', window.location.pathname);
-    // Redirect to Google auth
-    window.location.href = `${API_BASE_URL}/api/auth/google`;
-  }
-  
-  // Redirect to dashboard function
-  function redirectToDashboard() {
-    // Check if we're already on the dashboard
-    if (window.location.pathname.includes('/user/home') || 
-        window.location.pathname.includes('/dashboard')) {
-      return; // Already on dashboard
-    }
+}
+
+/**
+ * Redirect to the appropriate dashboard based on user role
+ */
+function redirectToDashboard() {
+  // Check if user is authenticated
+  if (isAuthenticated() || document.cookie.includes('connect.sid')) {
+    // Get user data
+    const userData = getCurrentUser();
     
-    // Redirect to dashboard - handle both .html and non-.html versions
-    // This ensures compatibility with both Netlify static hosting and server-side routing
-    const dashPath = '/user/home';
-    
-    // Check if we need to add .html extension (for Netlify static hosting)
-    if (window.location.hostname.includes('netlify.app') || 
-        window.location.hostname === 'myngenda.com') {
-      window.location.href = `${dashPath}.html`;
+    // Redirect based on role
+    if (userData && userData.role === 'admin') {
+      window.location.href = '/admin/dashboard.html';
     } else {
-      window.location.href = dashPath;
+      window.location.href = '/user/home.html';
     }
   }
-  
-  // Return public methods
-  return {
-    login,
-    register,
-    logout,
-    googleAuth,
-    isAuthenticated,
-    getCurrentUser,
-    redirectToDashboard,
-    apiRequest  // Export this for other scripts that need API access
-  };
-})();
+}
+
+// Export all functions for use in the application
+window.MyngendaAuth = {
+  login,
+  register,
+  logout,
+  isAuthenticated,
+  getCurrentUser,
+  apiRequest,
+  redirectToDashboard
+};
