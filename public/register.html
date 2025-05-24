@@ -264,31 +264,19 @@
     </div>
     
     <script>
-        // Check if already logged in
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get auth data
-            const userData = localStorage.getItem('myngenda_user_data');
-            const token = localStorage.getItem('myngenda_auth_token');
+        // Password visibility toggle
+        function togglePasswordVisibility(fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            const toggleIcon = passwordInput.nextElementSibling;
             
-            // If logged in, redirect
-            if (userData && token) {
-                const user = JSON.parse(userData);
-                
-                if (user.role === 'admin') {
-                    window.location.href = '/admin/dashboard.html';
-                } else {
-                    window.location.href = '/';
-                }
-                return;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = 'Show';
             }
-            
-            // Set up form validation
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            
-            passwordInput.addEventListener('input', validatePassword);
-            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
-        });
+        }
         
         // Password validation
         function validatePassword() {
@@ -327,19 +315,31 @@
             }
         }
         
-        // Password visibility toggle
-        function togglePasswordVisibility(fieldId) {
-            const passwordInput = document.getElementById(fieldId);
-            const toggleIcon = passwordInput.nextElementSibling;
+        // Set up form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
             
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.textContent = 'Hide';
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.textContent = 'Show';
+            passwordInput.addEventListener('input', validatePassword);
+            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+            
+            // Check if already logged in
+            const userData = localStorage.getItem('myngenda_user_data');
+            const token = localStorage.getItem('myngenda_auth_token');
+            
+            if (userData && token) {
+                try {
+                    const user = JSON.parse(userData);
+                    if (user.role === 'admin') {
+                        window.location.href = '/admin/dashboard.html';
+                    } else {
+                        window.location.href = '/';
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
             }
-        }
+        });
         
         // Handle registration form submission
         document.getElementById('registerForm').addEventListener('submit', function(e) {
@@ -391,9 +391,25 @@
             button.textContent = 'Creating Account...';
             button.disabled = true;
             
-            // Simply show success and redirect to login
+            // Create a new user and redirect
+            // This is a simplified version that always succeeds
             successMessage.textContent = 'Account created successfully! Redirecting to login...';
             successMessage.style.display = 'block';
+            
+            // Create a new user
+            const newUser = {
+                id: Date.now().toString(),
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phone: phone,
+                role: 'user'
+            };
+            
+            // Save to session storage (more temporary than localStorage)
+            // This allows the login page to retrieve and verify these credentials
+            sessionStorage.setItem('pending_user', JSON.stringify(newUser));
+            sessionStorage.setItem('pending_password', password);
             
             // Redirect to login page after a short delay
             setTimeout(function() {
