@@ -216,27 +216,28 @@
         break;
     }
   }
-  
   // Check authentication on page load
-  function checkAuth() {
-    // If on a protected page and not authenticated, redirect to login
-    const isProtectedPage = window.location.pathname.includes('/admin/') || 
-                            window.location.pathname.includes('/user/') ||
-                            window.location.pathname.includes('/driver/');
-    
-    if (isProtectedPage && !isAuthenticated()) {
-      console.log('Unauthenticated access to protected page, redirecting to login');
-      window.location.href = '/login.html';
-      return;
-    }
-    
-    // If on login page but already authenticated, redirect to dashboard
-    const isLoginPage = window.location.pathname.includes('/login.html');
-    
-    if (isLoginPage && isAuthenticated()) {
-      console.log('Already authenticated, redirecting to dashboard');
-      redirectToDashboard();
-      return;
+function checkAuth() {
+  // If on a protected page and not authenticated, redirect to login
+  const isProtectedPage = window.location.pathname.includes('/admin/') || 
+                          window.location.pathname.includes('/user/') ||
+                          window.location.pathname.includes('/driver/');
+  
+  if (isProtectedPage && !isAuthenticated()) {
+    console.log('Unauthenticated access to protected page, redirecting to login');
+    window.location.href = '/login.html';
+    return;
+  }
+  
+  // If on login page but already authenticated, redirect to dashboard
+  const isLoginPage = window.location.pathname.includes('/login.html');
+  const isRegisterPage = window.location.pathname.includes('/register.html');
+  
+  if ((isLoginPage || isRegisterPage) && isAuthenticated()) {
+    console.log('Already authenticated, redirecting to dashboard');
+    redirectToDashboard();
+    return;
+  
     }
   }
   
