@@ -42,8 +42,7 @@
     }
   }
   
-  // Get stored token
-function getToken() {
+  function getToken() {
   return localStorage.getItem(config.tokenName);
 
   }
