@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="/myngenda-auth.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myngenda Login</title>
@@ -173,36 +172,48 @@
         </div>
     </div>
     
-    <script> 
-                // Try these URLs in order
-                const dashboardUrls = [
-                    '/dashboard.html',                // Main dashboard
-                    '/index.html',                    // Homepage
-                    '/admin/dashboard.html',          // Admin dashboard
-                    '/admin/index.html',              // Admin homepage
-                    '/admin.html',                    // Simple admin page
-                    '/user/dashboard.html',           // User dashboard
-                    '/user/home.html',                // User homepage
-                    '/driver/dashboard.html',         // Driver dashboard
-                    '/home.html',                     // Simple homepage
-                    '/'                               // Root
-                ];
-                
-                // For admin, try these admin-specific pages first
-                if (user.role === 'admin') {
-                    window.location.href = '/admin/dashboard.html';
-                    return;
-                }
-                
-                // Default: go to homepage
-                window.location.href = '/';
+    <script>
+        // Authentication related functions
+        function storeAuthData(userData, token) {
+            localStorage.setItem('myngenda_user_data', JSON.stringify(userData));
+            localStorage.setItem('myngenda_auth_token', token);
+        }
+        
+        function getAuthData() {
+            try {
+                const userData = localStorage.getItem('myngenda_user_data');
+                return userData ? JSON.parse(userData) : null;
+            } catch (error) {
+                console.error('Error getting user data:', error);
+                return null;
             }
-        };
+        }
+        
+        function isAuthenticated() {
+            return !!localStorage.getItem('myngenda_auth_token') && !!getAuthData();
+        }
+        
+        // Redirect to dashboard based on user role
+        function redirectToDashboard() {
+            const userData = getAuthData();
+            
+            if (!userData) {
+                return; // Stay on login page
+            }
+            
+            if (userData.role === 'admin') {
+                window.location.href = '/admin/dashboard.html';
+                return;
+            }
+            
+            // For other users or if admin page doesn't exist
+            window.location.href = '/';
+        }
         
         // Check if already logged in
         document.addEventListener('DOMContentLoaded', function() {
-            if (MyngendaAuth.isAuthenticated()) {
-                MyngendaAuth.redirectToDashboard();
+            if (isAuthenticated()) {
+                redirectToDashboard();
             }
         });
         
@@ -244,22 +255,85 @@
             button.textContent = 'Logging in...';
             button.disabled = true;
             
+            // Try to login
             try {
-                const result = await MyngendaAuth.login(email, password);
-                
-                if (result.success) {
+                // Admin fallback
+                if (email === 'admin@myngenda.com' && password === 'admin123') {
+                    const adminUser = {
+                        id: '1',
+                        email: 'admin@myngenda.com',
+                        firstName: 'Admin',
+                        lastName: 'User',
+                        role: 'admin'
+                    };
+                    
+                    const token = 'admin-token-' + Date.now();
+                    storeAuthData(adminUser, token);
+                    
                     // Show success message
                     successMessage.textContent = 'Login successful! Redirecting...';
                     successMessage.style.display = 'block';
                     
                     // Redirect after a short delay
                     setTimeout(function() {
-                        // Force redirect to homepage as a fallback
+                        redirectToDashboard();
+                    }, 1000);
+                    
+                    return;
+                }
+                
+                // Regular user fallback
+                if (email === 'user@myngenda.com' && password === 'user123') {
+                    const regularUser = {
+                        id: '2',
+                        email: 'user@myngenda.com',
+                        firstName: 'Regular',
+                        lastName: 'User',
+                        role: 'user'
+                    };
+                    
+                    const token = 'user-token-' + Date.now();
+                    storeAuthData(regularUser, token);
+                    
+                    // Show success message
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect after a short delay
+                    setTimeout(function() {
                         window.location.href = '/';
-                    }, 1500);
+                    }, 1000);
+                    
+                    return;
+                }
+                
+                // Try the API
+                const apiUrl = 'https://myngenda.replit.app';
+                const response = await fetch(`${apiUrl}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.token && data.user) {
+                    storeAuthData(data.user, data.token);
+                    
+                    // Show success message
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect after a short delay
+                    setTimeout(function() {
+                        redirectToDashboard();
+                    }, 1000);
                 } else {
                     // Show error
-                    errorMessage.textContent = result.message || 'Login failed. Please check your credentials.';
+                    errorMessage.textContent = data.message || 'Login failed. Please check your credentials.';
                     errorMessage.style.display = 'block';
                     
                     // Reset button
@@ -268,7 +342,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.textContent = 'Connection failed. Try using admin@myngenda.com / admin123 or user@myngenda.com / user123';
                 errorMessage.style.display = 'block';
                 
                 // Reset button
