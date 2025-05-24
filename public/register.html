@@ -1,443 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Myngenda</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" href="/icons/myngenda-icon.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <style>
-    :root {
-      --primary-color: #43a047;
-      --primary-dark: #2e7d32;
-      --primary-light: #76d275;
-      --text-dark: #333;
-      --text-light: #fafafa;
-      --background-light: #f5f5f5;
-      --error-color: #d32f2f;
-      --success-color: #388e3c;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--background-light);
-      color: var(--text-dark);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px 0;
-    }
-    
-    .container {
-      width: 100%;
-      max-width: 480px;
-      padding: 20px;
-    }
-    
-    .card {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      padding: 30px;
-      width: 100%;
-    }
-    
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .logo img {
-      width: 80px;
-      margin-bottom: 10px;
-    }
-    
-    .logo h1 {
-      color: var(--primary-color);
-      font-size: 24px;
-      margin-bottom: 5px;
-    }
-    
-    .logo p {
-      color: #666;
-      font-size: 14px;
-    }
-    
-    form {
-      margin-bottom: 20px;
-    }
-    
-    .form-row {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-    
-    .form-group {
-      margin-bottom: 15px;
-      flex: 1;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-      color: #555;
-    }
-    
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      transition: border-color 0.3s;
-    }
-    
-    input:focus, select:focus {
-      border-color: var(--primary-color);
-      outline: none;
-    }
-    
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-    
-    .checkbox-group input {
-      width: auto;
-      margin-right: 10px;
-    }
-    
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    button:hover {
-      background-color: var(--primary-dark);
-    }
-    
-    button:disabled {
-      background-color: #aaa;
-      cursor: not-allowed;
-    }
-    
-    .links {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-    }
-    
-    .links a {
-      color: var(--primary-color);
-      text-decoration: none;
-    }
-    
-    .links a:hover {
-      text-decoration: underline;
-    }
-    
-    .social-login {
-      margin-top: 20px;
-      text-align: center;
-    }
-    
-    .social-login p {
-      margin-bottom: 15px;
-      font-size: 14px;
-      color: #666;
-      position: relative;
-    }
-    
-    .social-login p::before,
-    .social-login p::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 35%;
-      height: 1px;
-      background-color: #ddd;
-    }
-    
-    .social-login p::before {
-      left: 0;
-    }
-    
-    .social-login p::after {
-      right: 0;
-    }
-    
-    .google-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: white;
-      color: #555;
-      border: 1px solid #ddd;
-      padding: 10px 15px;
-      border-radius: 4px;
-      font-weight: 500;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    .google-btn:hover {
-      background-color: #f5f5f5;
-    }
-    
-    .google-btn i {
-      margin-right: 10px;
-      color: #ea4335;
-    }
-    
-    .alert {
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      display: none;
-    }
-    
-    .alert-error {
-      background-color: #ffebee;
-      color: var(--error-color);
-      display: block;
-    }
-    
-    .alert-success {
-      background-color: #e8f5e9;
-      color: var(--success-color);
-      display: block;
-    }
-    
-    .loader {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
-      display: none;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .version {
-      text-align: center;
-      font-size: 12px;
-      color: #999;
-      margin-top: 15px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myngenda Registration</title>
+    <!-- Keep your existing styles -->
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="logo">
-        <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='https://via.placeholder.com/80?text=M'">
-        <h1>Myngenda</h1>
-        <p>Create your account</p>
-      </div>
-      
-      <div id="alert" class="alert"></div>
-      
-      <form id="registerForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" name="firstName" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" required>
-          </div>
+    <div class="register-container">
+        <div class="logo">
+            <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='/public/icon.png'">
         </div>
         
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required>
-        </div>
+        <h1>Create Account</h1>
         
-        <div class="form-group">
-          <label for="phoneNumber">Phone Number</label>
-          <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Optional">
-        </div>
-        
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="role">Account Type</label>
-          <select id="role" name="role" required>
-            <option value="customer">Customer</option>
-            <option value="driver">Driver</option>
-          </select>
-        </div>
-        
-        <div class="checkbox-group">
-          <input type="checkbox" id="terms" name="terms" required>
-          <label for="terms">I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a></label>
-        </div>
-        
-        <button type="submit" id="registerBtn">
-          Create Account
-          <span id="registerLoader" class="loader"></span>
-        </button>
-      </form>
-      
-      <div class="links">
-        <p>Already have an account? <a href="login.html">Log In</a></p>
-      </div>
-      
-      <div class="social-login">
-        <p>Or</p>
-        <button id="googleRegisterBtn" class="google-btn">
-          <i class="fab fa-google"></i> Register with Google
-        </button>
-      </div>
-      
-      <div class="version">v1.2.0</div>
-    </div>
-  </div>
-  
-  <!-- Include the auth connector script -->
-  <script src="/auth-connector.js"></script>
-  
-  <script>
-    // Get DOM elements
-    const registerForm = document.getElementById('registerForm');
-    const registerBtn = document.getElementById('registerBtn');
-    const registerLoader = document.getElementById('registerLoader');
-    const googleRegisterBtn = document.getElementById('googleRegisterBtn');
-    const alertBox = document.getElementById('alert');
-    
-    // Check if user is already logged in
-    document.addEventListener('DOMContentLoaded', function() {
-      // Redirect to dashboard if already logged in
-      window.MyngendaAuth.redirectToDashboard();
-    });
-    
-    // Handle registration form submission
-    registerForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const firstName = document.getElementById('firstName').value;
-      const lastName = document.getElementById('lastName').value;
-      const email = document.getElementById('email').value;
-      const phoneNumber = document.getElementById('phoneNumber').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const role = document.getElementById('role').value;
-      const termsChecked = document.getElementById('terms').checked;
-      
-      // Basic validation
-      if (password !== confirmPassword) {
-        alertBox.textContent = 'Passwords do not match';
-        alertBox.className = 'alert alert-error';
-        alertBox.style.display = 'block';
-        return;
-      }
-      
-      if (!termsChecked) {
-        alertBox.textContent = 'You must agree to the Terms of Service and Privacy Policy';
-        alertBox.className = 'alert alert-error';
-        alertBox.style.display = 'block';
-        return;
-      }
-      
-      // Show loading state
-      registerBtn.disabled = true;
-      registerLoader.style.display = 'inline-block';
-      alertBox.style.display = 'none';
-      
-      try {
-        // Use the authentication connector to register
-        const result = await window.MyngendaAuth.register({
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-          password,
-          role
-        });
-        
-        if (result.success) {
-          // Show success message
-          alertBox.textContent = 'Registration successful! Redirecting...';
-          alertBox.className = 'alert alert-success';
-          alertBox.style.display = 'block';
-          
-          // Redirect to the appropriate dashboard based on user role
-          setTimeout(() => {
-            // Check user role
-            const userData = window.MyngendaAuth.getCurrentUser();
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" required>
+            </div>
             
-            if (userData && userData.role === 'admin') {
-              window.location.href = '/admin/dashboard.html';
-            } else {
-              window.location.href = '/user/home.html';
-            }
-          }, 1500);
-        } else {
-          // Show error message
-          alertBox.textContent = result.message || 'Registration failed. Please try again.';
-          alertBox.className = 'alert alert-error';
-          alertBox.style.display = 'block';
-          
-          // Reset loading state
-          registerBtn.disabled = false;
-          registerLoader.style.display = 'none';
-        }
-      } catch (error) {
-        console.error('Registration error:', error);
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" id="phoneNumber" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+                <div class="password-toggle" onclick="togglePasswordVisibility()">
+                    <i class="show-password-icon">Show</i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" required>
+                    <option value="user">User</option>
+                    <option value="driver">Driver</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn primary">Register</button>
+            
+            <div id="errorMessage" class="error-message"></div>
+        </form>
         
-        // Show error message
-        alertBox.textContent = 'Connection error. Please try again.';
-        alertBox.className = 'alert alert-error';
-        alertBox.style.display = 'block';
-        
-        // Reset loading state
-        registerBtn.disabled = false;
-        registerLoader.style.display = 'none';
-      }
-    });
+        <div class="login-link">
+            Already have an account? <a href="/login.html">Login</a>
+        </div>
+    </div>
     
-    // Handle Google registration
-    googleRegisterBtn.addEventListener('click', function() {
-      window.location.href = '/api/auth/google';
-    });
-  </script>
+    <!-- Add the standalone authentication script -->
+    <script src="/standalone-auth.js"></script>
+    
+    <script>
+        // Password visibility toggle
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.show-password-icon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = 'Show';
+            }
+        }
+        
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (MyngendaAuth.isAuthenticated()) {
+                MyngendaAuth.redirectToDashboard();
+            }
+        });
+
+        // Handle registration form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.style.display = 'none';
+            
+            // Simple validation
+            if (!firstName || !lastName || !email || !phoneNumber || !password) {
+                errorMessage.textContent = 'Please fill in all fields';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Email validation
+            if (!email.includes('@')) {
+                errorMessage.textContent = 'Please enter a valid email address';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Show loading state
+            const button = this.querySelector('button');
+            const originalText = button.textContent;
+            button.textContent = 'Creating Account...';
+            button.disabled = true;
+            
+            try {
+                const result = await MyngendaAuth.register({
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                    password,
+                    role
+                });
+                
+                if (result.success) {
+                    // Success - redirect to dashboard
+                    MyngendaAuth.redirectToDashboard();
+                } else {
+                    // Show error
+                    errorMessage.textContent = result.message || 'Registration failed. Please try again.';
+                    errorMessage.style.display = 'block';
+                    
+                    // Reset button
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+                
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>

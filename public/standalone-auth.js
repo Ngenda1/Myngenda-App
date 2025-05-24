@@ -1,173 +1,266 @@
 /**
- * Standalone Authentication System for Myngenda
+ * Standalone Authentication Solution for Myngenda
  * 
- * This is a completely independent authentication system that works
- * without requiring complex backend connections.
+ * This file contains a complete, self-contained authentication system
+ * that works reliably across all browsers.
  */
 
-// Create a namespace for our authentication system
-window.MyngendaAuth = (function() {
-  // Storage keys
-  const TOKEN_KEY = 'myngenda_auth_token';
-  const USER_KEY = 'myngenda_user_data';
+// Create a self-executing function to avoid polluting the global scope
+(function() {
+  // Create the global auth object
+  window.MyngendaAuth = {};
   
-  // Demo credentials for testing
-  const DEMO_USERS = [
-    {
-      id: 1,
-      email: 'admin@myngenda.com',
-      password: 'admin123', // In a real system, this would be hashed
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin',
-      profileImageUrl: '/icons/myngenda-icon.png'
-    },
-    {
-      id: 2,
-      email: 'driver@myngenda.com',
-      password: 'driver123',
-      firstName: 'Sample',
-      lastName: 'Driver',
-      role: 'driver',
-      profileImageUrl: '/icons/myngenda-icon.png'
-    },
-    {
-      id: 3,
-      email: 'user@myngenda.com',
-      password: 'user123',
-      firstName: 'Sample',
-      lastName: 'Customer',
-      role: 'user',
-      profileImageUrl: '/icons/myngenda-icon.png'
-    }
-  ];
+  // Configuration
+  const config = {
+    apiUrl: 'https://myngenda.replit.app',
+    tokenName: 'myngenda_auth_token',
+    userData: 'myngenda_user_data'
+  };
   
-  // Generate a simple token
-  function generateToken(userId) {
-    return btoa(`${userId}:${Date.now()}:myngenda-auth`);
-  }
-  
-  // Store user data and token
-  function storeAuthData(user, token) {
-    localStorage.setItem(TOKEN_KEY, token);
-    
-    // Store user data without the password
-    const userData = { ...user };
-    delete userData.password;
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
-    
-    return { user: userData, token };
-  }
-  
-  // Clear auth data
-  function clearAuthData() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  }
-  
-  // Check if user is authenticated
-  function isAuthenticated() {
-    return !!localStorage.getItem(TOKEN_KEY);
-  }
-  
-  // Get current user
-  function getCurrentUser() {
-    const userData = localStorage.getItem(USER_KEY);
-    if (!userData) return null;
+  // Store user data in localStorage
+  function storeUserData(userData, token) {
+    if (!userData || !token) return false;
     
     try {
-      return JSON.parse(userData);
-    } catch (e) {
-      console.error('Error parsing user data', e);
+      localStorage.setItem(config.userData, JSON.stringify(userData));
+      localStorage.setItem(config.tokenName, token);
+      return true;
+    } catch (error) {
+      console.error('Failed to store authentication data:', error);
+      return false;
+    }
+  }
+  
+  // Get stored user data
+  function getUserData() {
+    try {
+      const data = localStorage.getItem(config.userData);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Failed to retrieve user data:', error);
       return null;
     }
   }
   
-  // Login function
-  async function login(email, password) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          // Find user
-          const user = DEMO_USERS.find(u => 
-            u.email.toLowerCase() === email.toLowerCase() && 
-            u.password === password
-          );
-          
-          if (!user) {
-            return reject({ message: 'Invalid email or password' });
-          }
-          
-          // Generate and store token
-          const token = generateToken(user.id);
-          const result = storeAuthData(user, token);
-          
-          resolve(result);
-        } catch (error) {
-          reject({ message: 'Login failed. Please try again.' });
-        }
-      }, 800); // Simulate network delay
-    });
+  // Get stored token
+  function getToken() {
+    return localStorage.setItem(config.tokenName);
   }
   
-  // Register function
-  async function register(userData) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          // Check if email already exists
-          if (DEMO_USERS.some(u => u.email.toLowerCase() === userData.email.toLowerCase())) {
-            return reject({ message: 'Email is already registered' });
+  // Clear authentication data
+  function clearAuthData() {
+    localStorage.removeItem(config.userData);
+    localStorage.removeItem(config.tokenName);
+  }
+  
+  // Check if user is authenticated
+  function isAuthenticated() {
+    return !!getToken() && !!getUserData();
+  }
+  
+  // Make an API request with retry capability
+  async function apiRequest(endpoint, options = {}) {
+    const url = `${config.apiUrl}${endpoint}`;
+    
+    // Default headers
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+    
+    // Add auth token if available
+    const token = getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Request options
+    const requestOptions = {
+      ...options,
+      headers,
+      credentials: 'include'
+    };
+    
+    console.log(`Making ${options.method || 'GET'} request to: ${url}`);
+    
+    // Implement retry logic
+    const maxRetries = 3;
+    let attempts = 0;
+    
+    while (attempts < maxRetries) {
+      try {
+        const response = await fetch(url, requestOptions);
+        const data = await response.json().catch(() => ({ 
+          success: false, 
+          message: 'Invalid response format'
+        }));
+        
+        if (!response.ok) {
+          console.error(`API error (${response.status}):`, data.message || response.statusText);
+          
+          // Handle unauthorized responses
+          if (response.status === 401) {
+            clearAuthData();
           }
           
-          // Create new user (in a real system, this would be saved to DB)
-          const newUser = {
-            id: DEMO_USERS.length + 1,
-            ...userData
+          return {
+            success: false,
+            status: response.status,
+            message: data.message || `Error: ${response.statusText}`
           };
-          
-          // In this demo, we're not actually saving to DEMO_USERS array
-          // since it would reset on page reload
-          
-          // Generate and store token
-          const token = generateToken(newUser.id);
-          const result = storeAuthData(newUser, token);
-          
-          resolve(result);
-        } catch (error) {
-          reject({ message: 'Registration failed. Please try again.' });
         }
-      }, 1000); // Simulate network delay
-    });
+        
+        return data;
+      } catch (error) {
+        attempts++;
+        console.warn(`Request failed (attempt ${attempts}/${maxRetries}):`, error.message);
+        
+        if (attempts >= maxRetries) {
+          console.error('Max retries reached');
+          return {
+            success: false,
+            message: 'Connection failed. Please check your internet connection and try again.'
+          };
+        }
+        
+        // Wait before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts - 1)));
+      }
+    }
   }
   
-  // Logout function
+  // Register a new user
+  async function register(userData) {
+    try {
+      console.log('Attempting to register user:', userData.email);
+      
+      const result = await apiRequest('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+      });
+      
+      if (result.success && result.token && result.user) {
+        // Store authentication data
+        storeUserData(result.user, result.token);
+        console.log('Registration successful');
+        return { success: true, user: result.user };
+      }
+      
+      return {
+        success: false,
+        message: result.message || 'Registration failed'
+      };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, message: 'An error occurred during registration' };
+    }
+  }
+  
+  // Login user
+  async function login(email, password) {
+    try {
+      console.log('Attempting to login user:', email);
+      
+      const result = await apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      
+      if (result.success && result.token && result.user) {
+        // Store authentication data
+        storeUserData(result.user, result.token);
+        console.log('Login successful');
+        return { success: true, user: result.user };
+      }
+      
+      return {
+        success: false,
+        message: result.message || 'Login failed'
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, message: 'An error occurred during login' };
+    }
+  }
+  
+  // Logout user
   function logout() {
     clearAuthData();
+    // Redirect to login page
     window.location.href = '/login.html';
+    return { success: true };
   }
   
-  // Google auth simulation
-  function googleAuth() {
-    // Simulate Google login (in a real app this would redirect to Google)
-    setTimeout(() => {
-      // Use the first demo user for the simulation
-      const user = DEMO_USERS[2]; // Regular user
-      const token = generateToken(user.id);
-      storeAuthData(user, token);
-      
-      // Redirect to dashboard
-      window.location.href = '/user/home';
-    }, 1500); // Simulate delay for Google auth
+  // Redirect user to appropriate dashboard based on role
+  function redirectToDashboard() {
+    const user = getUserData();
+    
+    if (!user) {
+      console.error('No user data found, redirecting to login');
+      window.location.href = '/login.html';
+      return;
+    }
+    
+    console.log('Redirecting user to dashboard for role:', user.role);
+    
+    switch (user.role) {
+      case 'admin':
+        window.location.href = '/admin/dashboard.html';
+        break;
+      case 'driver':
+        window.location.href = '/driver/dashboard.html';
+        break;
+      case 'user':
+      default:
+        window.location.href = '/user/home.html';
+        break;
+    }
   }
   
-  // Return public methods
-  return {
-    login,
+  // Check authentication on page load
+  function checkAuth() {
+    // If on a protected page and not authenticated, redirect to login
+    const isProtectedPage = window.location.pathname.includes('/admin/') || 
+                            window.location.pathname.includes('/user/') ||
+                            window.location.pathname.includes('/driver/');
+    
+    if (isProtectedPage && !isAuthenticated()) {
+      console.log('Unauthenticated access to protected page, redirecting to login');
+      window.location.href = '/login.html';
+      return;
+    }
+    
+    // If on login page but already authenticated, redirect to dashboard
+    const isLoginPage = window.location.pathname.includes('/login.html');
+    
+    if (isLoginPage && isAuthenticated()) {
+      console.log('Already authenticated, redirecting to dashboard');
+      redirectToDashboard();
+      return;
+    }
+  }
+  
+  // Public API
+  window.MyngendaAuth = {
     register,
+    login,
     logout,
-    googleAuth,
     isAuthenticated,
-    getCurrentUser
+    getUserData,
+    redirectToDashboard,
+    apiRequest
   };
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('MyngendaAuth initialized');
+    checkAuth();
+    
+    // Check if debug mode is enabled
+    if (window.location.search.includes('debug=true')) {
+      console.log('Debug mode enabled');
+      console.log('Authentication status:', isAuthenticated() ? 'Authenticated' : 'Not authenticated');
+      console.log('User data:', getUserData());
+    }
+  });
 })();
