@@ -114,6 +114,16 @@
             border-radius: 4px;
         }
         
+        .success-message {
+            color: #2e7d32;
+            margin-top: 16px;
+            text-align: center;
+            display: none;
+            padding: 8px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+        }
+        
         .register-link {
             text-align: center;
             margin-top: 20px;
@@ -153,6 +163,7 @@
             
             <button type="submit" id="loginButton">Login</button>
             
+            <div id="successMessage" class="success-message"></div>
             <div id="errorMessage" class="error-message"></div>
         </form>
         
@@ -245,7 +256,7 @@
                 }
             },
             
-            // Redirect to dashboard based on role
+            // Check available dashboards and redirect to the first one that exists
             redirectToDashboard: function() {
                 const user = this.getUserData();
                 
@@ -254,18 +265,28 @@
                     return;
                 }
                 
-                switch (user.role) {
-                    case 'admin':
-                        window.location.href = '/admin/dashboard.html';
-                        break;
-                    case 'driver':
-                        window.location.href = '/driver/dashboard.html';
-                        break;
-                    case 'user':
-                    default:
-                        window.location.href = '/user/home.html';
-                        break;
+                // Try these URLs in order
+                const dashboardUrls = [
+                    '/dashboard.html',                // Main dashboard
+                    '/index.html',                    // Homepage
+                    '/admin/dashboard.html',          // Admin dashboard
+                    '/admin/index.html',              // Admin homepage
+                    '/admin.html',                    // Simple admin page
+                    '/user/dashboard.html',           // User dashboard
+                    '/user/home.html',                // User homepage
+                    '/driver/dashboard.html',         // Driver dashboard
+                    '/home.html',                     // Simple homepage
+                    '/'                               // Root
+                ];
+                
+                // For admin, try these admin-specific pages first
+                if (user.role === 'admin') {
+                    window.location.href = '/admin/dashboard.html';
+                    return;
                 }
+                
+                // Default: go to homepage
+                window.location.href = '/';
             }
         };
         
@@ -297,8 +318,10 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
             
             errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
             
             if (!email || !password) {
                 errorMessage.textContent = 'Please enter both email and password';
@@ -316,8 +339,15 @@
                 const result = await MyngendaAuth.login(email, password);
                 
                 if (result.success) {
-                    // Success - redirect to dashboard
-                    MyngendaAuth.redirectToDashboard();
+                    // Show success message
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect after a short delay
+                    setTimeout(function() {
+                        // Force redirect to homepage as a fallback
+                        window.location.href = '/';
+                    }, 1500);
                 } else {
                     // Show error
                     errorMessage.textContent = result.message || 'Login failed. Please check your credentials.';
