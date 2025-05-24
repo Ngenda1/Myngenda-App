@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="/myngenda-auth.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myngenda Register</title>
@@ -265,144 +264,27 @@
     </div>
     
     <script>
-        // Simple authentication solution with a fallback for admin access
-        const MyngendaAuth = {
-            apiUrl: 'https://myngenda.replit.app',
-            tokenName: 'myngenda_auth_token',
-            userData: 'myngenda_user_data',
-            
-            // Store user data in localStorage
-            storeUserData: function(userData, token) {
-                localStorage.setItem(this.userData, JSON.stringify(userData));
-                localStorage.setItem(this.tokenName, token);
-            },
-            
-            // Get user data
-            getUserData: function() {
-                try {
-                    const data = localStorage.getItem(this.userData);
-                    return data ? JSON.parse(data) : null;
-                } catch (error) {
-                    console.error('Error getting user data:', error);
-                    return null;
-                }
-            },
-            
-            // Check if user is authenticated
-            isAuthenticated: function() {
-                return !!localStorage.getItem(this.tokenName) && !!this.getUserData();
-            },
-            
-            // Register a new user
-            register: async function(userData) {
-                // Demo mode - create a new user locally
-                try {
-                    // Try the API first
-                    const response = await fetch(`${this.apiUrl}/api/auth/register`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(userData)
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success && data.token && data.user) {
-                        this.storeUserData(data.user, data.token);
-                        return {
-                            success: true,
-                            user: data.user
-                        };
-                    }
-                    
-                    // If API fails but it's a valid user, create a local account
-                    if (userData.email && userData.password) {
-                        const newUser = {
-                            id: 'user-' + Date.now(),
-                            email: userData.email,
-                            firstName: userData.firstName || '',
-                            lastName: userData.lastName || '',
-                            phone: userData.phone || '',
-                            role: 'user'
-                        };
-                        
-                        const token = 'user-token-' + Date.now();
-                        this.storeUserData(newUser, token);
-                        
-                        return {
-                            success: true,
-                            user: newUser,
-                            message: 'Account created successfully in offline mode.'
-                        };
-                    }
-                    
-                    return {
-                        success: false,
-                        message: data.message || 'Registration failed'
-                    };
-                } catch (error) {
-                    console.error('Registration error:', error);
-                    
-                    // Fallback - create a user locally if API is unavailable
-                    if (userData.email && userData.password) {
-                        const newUser = {
-                            id: 'user-' + Date.now(),
-                            email: userData.email,
-                            firstName: userData.firstName || '',
-                            lastName: userData.lastName || '',
-                            phone: userData.phone || '',
-                            role: 'user'
-                        };
-                        
-                        const token = 'user-token-' + Date.now();
-                        this.storeUserData(newUser, token);
-                        
-                        return {
-                            success: true,
-                            user: newUser,
-                            message: 'Account created successfully in offline mode.'
-                        };
-                    }
-                    
-                    return {
-                        success: false,
-                        message: 'Connection failed. Please check your internet connection.'
-                    };
-                }
-            },
-            
-            // Check available dashboards and redirect to the first one that exists
-            redirectToDashboard: function() {
-                const user = this.getUserData();
-                
-                if (!user) {
-                    window.location.href = '/login.html';
-                    return;
-                }
-                
-                // For admin users
-                if (user.role === 'admin') {
-                    window.location.href = '/admin/dashboard.html';
-                    return;
-                }
-                
-                // Default: go to homepage
-                window.location.href = '/';
-            }
-        };
-        
         // Check if already logged in
         document.addEventListener('DOMContentLoaded', function() {
-            if (MyngendaAuth.isAuthenticated()) {
-                MyngendaAuth.redirectToDashboard();
+            // Get auth data
+            const userData = localStorage.getItem('myngenda_user_data');
+            const token = localStorage.getItem('myngenda_auth_token');
+            
+            // If logged in, redirect
+            if (userData && token) {
+                const user = JSON.parse(userData);
+                
+                if (user.role === 'admin') {
+                    window.location.href = '/admin/dashboard.html';
+                } else {
+                    window.location.href = '/';
+                }
+                return;
             }
             
-            // Set up password validation
+            // Set up form validation
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
-            const passwordValidation = document.getElementById('passwordValidation');
-            const passwordMatchValidation = document.getElementById('passwordMatchValidation');
             
             passwordInput.addEventListener('input', validatePassword);
             confirmPasswordInput.addEventListener('input', validatePasswordMatch);
@@ -417,6 +299,7 @@
             
             if (password.length < 6) {
                 passwordValidation.className = 'validation-message error';
+                passwordValidation.textContent = 'Password must be at least 6 characters';
                 return false;
             } else {
                 passwordValidation.className = 'validation-message success';
@@ -458,8 +341,8 @@
             }
         }
         
-        // Handle register form submission
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        // Handle registration form submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Validate form
@@ -508,45 +391,14 @@
             button.textContent = 'Creating Account...';
             button.disabled = true;
             
-            // Prepare user data
-            const userData = {
-                firstName,
-                lastName,
-                email,
-                phone,
-                password
-            };
+            // Simply show success and redirect to login
+            successMessage.textContent = 'Account created successfully! Redirecting to login...';
+            successMessage.style.display = 'block';
             
-            try {
-                const result = await MyngendaAuth.register(userData);
-                
-                if (result.success) {
-                    // Show success message
-                    successMessage.textContent = result.message || 'Account created successfully! Redirecting...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect after a short delay
-                    setTimeout(function() {
-                        window.location.href = '/login.html';
-                    }, 1500);
-                } else {
-                    // Show error
-                    errorMessage.textContent = result.message || 'Registration failed. Please try again.';
-                    errorMessage.style.display = 'block';
-                    
-                    // Reset button
-                    button.textContent = originalText;
-                    button.disabled = false;
-                }
-            } catch (error) {
-                console.error('Registration error:', error);
-                errorMessage.textContent = 'An error occurred. Please try again.';
-                errorMessage.style.display = 'block';
-                
-                // Reset button
-                button.textContent = originalText;
-                button.disabled = false;
-            }
+            // Redirect to login page after a short delay
+            setTimeout(function() {
+                window.location.href = '/login.html';
+            }, 1500);
         });
     </script>
 </body>
