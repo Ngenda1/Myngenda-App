@@ -163,20 +163,6 @@
             border-radius: 4px;
         }
         
-        .validation-message {
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .validation-message.error {
-            color: #d32f2f;
-        }
-        
-        .validation-message.success {
-            color: #2e7d32;
-        }
-        
         .login-link {
             text-align: center;
             margin-top: 20px;
@@ -227,10 +213,7 @@
                 <label for="password">Password</label>
                 <div class="password-toggle">
                     <input type="password" id="password" required minlength="6">
-                    <i class="show-password-icon" onclick="togglePasswordVisibility('password')">Show</i>
-                </div>
-                <div id="passwordValidation" class="validation-message">
-                    Password must be at least 6 characters
+                    <i class="show-password-icon" id="passwordToggle">Show</i>
                 </div>
             </div>
             
@@ -238,10 +221,7 @@
                 <label for="confirmPassword">Confirm Password</label>
                 <div class="password-toggle">
                     <input type="password" id="confirmPassword" required>
-                    <i class="show-password-icon" onclick="togglePasswordVisibility('confirmPassword')">Show</i>
-                </div>
-                <div id="passwordMatchValidation" class="validation-message">
-                    Passwords must match
+                    <i class="show-password-icon" id="confirmToggle">Show</i>
                 </div>
             </div>
             
@@ -264,154 +244,38 @@
     </div>
     
     <script>
-        // Password visibility toggle
-        function togglePasswordVisibility(fieldId) {
-            const passwordInput = document.getElementById(fieldId);
-            const toggleIcon = passwordInput.nextElementSibling;
-            
+        // Password toggles
+        document.getElementById('passwordToggle').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                toggleIcon.textContent = 'Hide';
+                this.textContent = 'Hide';
             } else {
                 passwordInput.type = 'password';
-                toggleIcon.textContent = 'Show';
-            }
-        }
-        
-        // Password validation
-        function validatePassword() {
-            const password = document.getElementById('password').value;
-            const passwordValidation = document.getElementById('passwordValidation');
-            
-            passwordValidation.style.display = 'block';
-            
-            if (password.length < 6) {
-                passwordValidation.className = 'validation-message error';
-                passwordValidation.textContent = 'Password must be at least 6 characters';
-                return false;
-            } else {
-                passwordValidation.className = 'validation-message success';
-                passwordValidation.textContent = 'Password strength: Good';
-                return true;
-            }
-        }
-        
-        // Password match validation
-        function validatePasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const passwordMatchValidation = document.getElementById('passwordMatchValidation');
-            
-            passwordMatchValidation.style.display = 'block';
-            
-            if (password !== confirmPassword) {
-                passwordMatchValidation.className = 'validation-message error';
-                passwordMatchValidation.textContent = 'Passwords do not match';
-                return false;
-            } else {
-                passwordMatchValidation.className = 'validation-message success';
-                passwordMatchValidation.textContent = 'Passwords match';
-                return true;
-            }
-        }
-        
-        // Set up form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            
-            passwordInput.addEventListener('input', validatePassword);
-            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
-            
-            // Check if already logged in
-            const userData = localStorage.getItem('myngenda_user_data');
-            const token = localStorage.getItem('myngenda_auth_token');
-            
-            if (userData && token) {
-                try {
-                    const user = JSON.parse(userData);
-                    if (user.role === 'admin') {
-                        window.location.href = '/admin/dashboard.html';
-                    } else {
-                        window.location.href = '/';
-                    }
-                } catch (e) {
-                    console.error('Error parsing user data:', e);
-                }
+                this.textContent = 'Show';
             }
         });
         
-        // Handle registration form submission
+        document.getElementById('confirmToggle').addEventListener('click', function() {
+            const confirmInput = document.getElementById('confirmPassword');
+            if (confirmInput.type === 'password') {
+                confirmInput.type = 'text';
+                this.textContent = 'Hide';
+            } else {
+                confirmInput.type = 'password';
+                this.textContent = 'Show';
+            }
+        });
+        
+        // Form submission
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Validate form
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const termsAgreement = document.getElementById('termsAgreement').checked;
+            // Show success message
+            document.getElementById('successMessage').textContent = 'Account created successfully! Redirecting to login...';
+            document.getElementById('successMessage').style.display = 'block';
             
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            
-            // Basic validation
-            if (!firstName || !lastName || !email || !phone || !password) {
-                errorMessage.textContent = 'Please fill in all required fields';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            if (password.length < 6) {
-                errorMessage.textContent = 'Password must be at least 6 characters';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            if (!termsAgreement) {
-                errorMessage.textContent = 'You must agree to the Terms and Conditions';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            // Show loading state
-            const button = document.getElementById('registerButton');
-            const originalText = button.textContent;
-            button.textContent = 'Creating Account...';
-            button.disabled = true;
-            
-            // Create a new user and redirect
-            // This is a simplified version that always succeeds
-            successMessage.textContent = 'Account created successfully! Redirecting to login...';
-            successMessage.style.display = 'block';
-            
-            // Create a new user
-            const newUser = {
-                id: Date.now().toString(),
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                phone: phone,
-                role: 'user'
-            };
-            
-            // Save to session storage (more temporary than localStorage)
-            // This allows the login page to retrieve and verify these credentials
-            sessionStorage.setItem('pending_user', JSON.stringify(newUser));
-            sessionStorage.setItem('pending_password', password);
-            
-            // Redirect to login page after a short delay
+            // Redirect to login after delay
             setTimeout(function() {
                 window.location.href = '/login.html';
             }, 1500);
