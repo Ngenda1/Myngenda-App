@@ -42,9 +42,9 @@
     }
   }
   
-  // Get stored token
   function getToken() {
-    return localStorage.setItem(config.tokenName);
+  return localStorage.getItem(config.tokenName);
+
   }
   
   // Clear authentication data
