@@ -3,238 +3,359 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Myngenda - Sign In</title>
-  
-  <!-- Official Myngenda icon for browser tabs and bookmarks -->
-  <link rel="icon" href="icons/myngenda-icon.png" type="image/png">
-  
-  <!-- Apple Touch Icon (for iOS devices) -->
-  <link rel="apple-touch-icon" href="icons/myngenda-icon.png">
-  
-  <!-- PWA manifest -->
-  <link rel="manifest" href="manifest.json">
-  
+  <title>Login - Myngenda</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/myngenda-icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
     :root {
-      --primary-color: #4CAF50;
-      --primary-dark: #3b8c3f;
-      --accent-color: #424242;
-      --light-gray: #f5f5f5;
-      --text-color: #333;
-      --error-color: #f44336;
-      --success-color: #4CAF50;
+      --primary-color: #43a047;
+      --primary-dark: #2e7d32;
+      --primary-light: #76d275;
+      --text-dark: #333;
+      --text-light: #fafafa;
+      --background-light: #f5f5f5;
+      --error-color: #d32f2f;
+      --success-color: #388e3c;
     }
     
-    body, html {
+    * {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--light-gray);
-      color: var(--text-color);
-      height: 100%;
+      box-sizing: border-box;
     }
     
-    .login-container {
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-light);
+      color: var(--text-dark);
       display: flex;
+      justify-content: center;
+      align-items: center;
       min-height: 100vh;
     }
     
-    .login-form-container {
+    .container {
       width: 100%;
-      max-width: 450px;
-      margin: auto;
-      padding: 40px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      max-width: 420px;
+      padding: 20px;
     }
     
-    .login-header {
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 100%;
+    }
+    
+    .logo {
       text-align: center;
       margin-bottom: 30px;
     }
     
-    .login-logo {
-      width: 120px;
-      margin-bottom: 15px;
+    .logo img {
+      width: 100px;
+      margin-bottom: 10px;
     }
     
-    h1 {
+    .logo h1 {
+      color: var(--primary-color);
       font-size: 24px;
-      font-weight: 600;
-      color: var(--accent-color);
-      margin: 0;
+      margin-bottom: 5px;
+    }
+    
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    form {
+      margin-bottom: 20px;
     }
     
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-weight: 500;
-      color: var(--accent-color);
+      color: #555;
     }
     
-    input[type="email"],
-    input[type="password"] {
+    input {
       width: 100%;
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
+      font-size: 14px;
       transition: border-color 0.3s;
     }
     
-    input[type="email"]:focus,
-    input[type="password"]:focus {
+    input:focus {
       border-color: var(--primary-color);
       outline: none;
     }
     
-    .submit-button {
-      display: block;
+    button {
       width: 100%;
       padding: 12px;
-      background: var(--primary-color);
+      background-color: var(--primary-color);
       color: white;
       border: none;
       border-radius: 4px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background-color 0.3s;
     }
     
-    .submit-button:hover {
-      background: var(--primary-dark);
+    button:hover {
+      background-color: var(--primary-dark);
     }
     
-    .login-footer {
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+    
+    .links {
       text-align: center;
-      margin-top: 25px;
+      margin-top: 20px;
+      font-size: 14px;
     }
     
-    .login-footer a {
+    .links a {
       color: var(--primary-color);
       text-decoration: none;
-      font-weight: 500;
     }
     
-    .login-footer a:hover {
+    .links a:hover {
       text-decoration: underline;
     }
     
-    .error-message {
-      background-color: #ffebee;
-      color: var(--error-color);
+    .social-login {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .social-login p {
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #666;
+      position: relative;
+    }
+    
+    .social-login p::before,
+    .social-login p::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 35%;
+      height: 1px;
+      background-color: #ddd;
+    }
+    
+    .social-login p::before {
+      left: 0;
+    }
+    
+    .social-login p::after {
+      right: 0;
+    }
+    
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      color: #555;
+      border: 1px solid #ddd;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .google-btn:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .google-btn i {
+      margin-right: 10px;
+      color: #ea4335;
+    }
+    
+    .alert {
       padding: 12px;
       border-radius: 4px;
       margin-bottom: 20px;
+      font-size: 14px;
       display: none;
+    }
+    
+    .alert-error {
+      background-color: #ffebee;
+      color: var(--error-color);
+      display: block;
+    }
+    
+    .alert-success {
+      background-color: #e8f5e9;
+      color: var(--success-color);
+      display: block;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      display: none;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .version {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-form-container">
-      <div class="login-header">
-        <img src="icons/myngenda-icon.png" alt="Myngenda Logo" class="login-logo">
-        <h1>Sign in to Myngenda</h1>
+  <div class="container">
+    <div class="card">
+      <div class="logo">
+        <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='https://via.placeholder.com/100?text=M'">
+        <h1>Myngenda</h1>
+        <p>Package Delivery Service</p>
       </div>
       
-      <div id="errorMessage" class="error-message"></div>
+      <div id="alert" class="alert"></div>
       
       <form id="loginForm">
         <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required autocomplete="email">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required>
         </div>
         
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required autocomplete="current-password">
+          <input type="password" id="password" name="password" required>
         </div>
         
-        <button type="submit" class="submit-button">Sign In</button>
+        <button type="submit" id="loginBtn">
+          Log In
+          <span id="loginLoader" class="loader"></span>
+        </button>
       </form>
       
-      <div style="margin-top: 25px; text-align: center;">
-        <p style="color: #666; margin-bottom: 15px;">Or sign in with</p>
-        <a href="/api/auth/google?redirect=/user/home" style="display: inline-block;">
-          <img src="icons/google-logo.png" 
-               alt="Sign in with Google" style="height: 40px; width: auto;">
-        </a>
+      <div class="links">
+        <a href="forgot-password.html">Forgot Password?</a>
+        <p>Don't have an account? <a href="register.html">Register</a></p>
       </div>
       
-      <div class="login-footer">
-        <p>Don't have an account? <a href="register.html">Create an account</a></p>
+      <div class="social-login">
+        <p>Or</p>
+        <button id="googleLoginBtn" class="google-btn">
+          <i class="fab fa-google"></i> Log in with Google
+        </button>
       </div>
+      
+      <div class="version">v1.2.0</div>
     </div>
   </div>
   
-  <!-- Load our standalone authentication system -->
-  <script src="/standalone-auth.js"></script>
+  <!-- Include the auth connector script -->
+  <script src="/auth-connector.js"></script>
   
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      
-      const errorMessage = document.getElementById('errorMessage');
-      errorMessage.style.display = 'none';
-      
-      // Show loading indicator
-      const submitButton = event.target.querySelector('button[type="submit"]');
-      const originalText = submitButton.textContent;
-      submitButton.disabled = true;
-      submitButton.textContent = 'Signing in...';
+    // Get DOM elements
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginLoader = document.getElementById('loginLoader');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const alertBox = document.getElementById('alert');
+    
+    // Check if user is already logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      // Redirect to dashboard if already logged in
+      window.MyngendaAuth.redirectToDashboard();
+    });
+    
+    // Handle login form submission
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
       
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       
+      // Show loading state
+      loginBtn.disabled = true;
+      loginLoader.style.display = 'inline-block';
+      alertBox.style.display = 'none';
+      
       try {
-        console.log('Attempting to log in with:', email);
-        
-        // Use our standalone authentication system
+        // Use the authentication connector to log in
         const result = await window.MyngendaAuth.login(email, password);
         
-        console.log('Login successful:', result.user);
-        
-        // Show success message
-        const successMessage = document.createElement('div');
-        successMessage.style.backgroundColor = '#e8f5e9';
-        successMessage.style.color = '#2e7d32';
-        successMessage.style.padding = '12px';
-        successMessage.style.borderRadius = '4px';
-        successMessage.style.marginBottom = '20px';
-        successMessage.style.textAlign = 'center';
-        successMessage.innerHTML = '<strong>Login successful!</strong><br>Redirecting to dashboard...';
-        
-        errorMessage.parentNode.insertBefore(successMessage, errorMessage);
-        
-        // Redirect to dashboard
-        setTimeout(() => {
-          window.location.href = '/user/home';
-        }, 1000);
+        if (result.success) {
+          // Show success message
+          alertBox.textContent = 'Login successful! Redirecting...';
+          alertBox.className = 'alert alert-success';
+          alertBox.style.display = 'block';
+          
+          // Redirect to the appropriate dashboard based on user role
+          setTimeout(() => {
+            // Check user role
+            const userData = window.MyngendaAuth.getCurrentUser();
+            
+            if (userData && userData.role === 'admin') {
+              window.location.href = '/admin/dashboard.html';
+            } else {
+              window.location.href = '/user/home.html';
+            }
+          }, 1000);
+        } else {
+          // Show error message
+          alertBox.textContent = result.message || 'Invalid email or password';
+          alertBox.className = 'alert alert-error';
+          alertBox.style.display = 'block';
+          
+          // Reset loading state
+          loginBtn.disabled = false;
+          loginLoader.style.display = 'none';
+        }
       } catch (error) {
         console.error('Login error:', error);
         
         // Show error message
-        errorMessage.textContent = error.message || 'Invalid email or password';
-        errorMessage.style.display = 'block';
+        alertBox.textContent = 'Connection error. Please try again.';
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
         
-        // Reset button
-        submitButton.disabled = false;
-        submitButton.textContent = originalText;
+        // Reset loading state
+        loginBtn.disabled = false;
+        loginLoader.style.display = 'none';
       }
     });
     
-    // Handle Google sign-in button
-    document.querySelector('.google-button').addEventListener('click', function(event) {
-      event.preventDefault();
-      window.MyngendaAuth.googleAuth();
+    // Handle Google login
+    googleLoginBtn.addEventListener('click', function() {
+      window.location.href = '/api/auth/google';
     });
   </script>
 </body>

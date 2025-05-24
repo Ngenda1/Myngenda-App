@@ -1,8 +1,8 @@
 /**
  * Enhanced Authentication Connector for Myngenda
  * 
- * This file provides a reliable connection between frontend and backend
- * with support for both cookie-based and token-based authentication.
+ * This file provides reliable authentication between frontend and backend
+ * with proper session handling and connection management.
  */
 
 (function() {
@@ -42,6 +42,8 @@
     // Also store in sessionStorage for tab-specific access
     sessionStorage.setItem('myngenda_user', JSON.stringify(user));
     sessionStorage.setItem('myngenda_token', token);
+    
+    console.log('Auth data stored for user:', user.email);
   }
 
   // Clear authentication data (for logout)
@@ -50,11 +52,13 @@
     localStorage.removeItem('myngenda_token');
     sessionStorage.removeItem('myngenda_user');
     sessionStorage.removeItem('myngenda_token');
+    
+    console.log('Auth data cleared');
   }
 
   // Check if user is authenticated via token
   function isAuthenticated() {
-    return !!localStorage.getItem('myngenda_token');
+    return !!localStorage.getItem('myngenda_token') || !!localStorage.getItem('myngenda_user');
   }
 
   // Get the current user data from localStorage
@@ -98,7 +102,27 @@
     console.log(`Making ${options.method || 'GET'} request to: ${url}`);
     
     try {
-      const response = await fetch(url, requestOptions);
+      // Add retry logic for network issues
+      const maxRetries = 3;
+      let retries = 0;
+      let response;
+      
+      while (retries < maxRetries) {
+        try {
+          response = await fetch(url, requestOptions);
+          break; // Success, exit retry loop
+        } catch (error) {
+          retries++;
+          console.warn(`Request failed (attempt ${retries}/${maxRetries}):`, error.message);
+          
+          if (retries >= maxRetries) {
+            throw error; // Max retries reached, propagate error
+          }
+          
+          // Wait before retry (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries - 1)));
+        }
+      }
       
       // Handle connection errors
       if (!response.ok) {
@@ -156,8 +180,8 @@
       
       console.log('Login result:', result);
       
-      if (result.success && result.token) {
-        storeAuthData(result.user, result.token);
+      if (result.success && result.user) {
+        storeAuthData(result.user, result.token || '');
         return {
           success: true,
           user: result.user
@@ -189,9 +213,9 @@
       
       console.log('Registration result:', result);
       
-      if (result.success && result.token) {
+      if (result.success && result.user) {
         // Auto-login after registration by storing auth data
-        storeAuthData(result.user, result.token);
+        storeAuthData(result.user, result.token || '');
         return {
           success: true,
           user: result.user
@@ -246,9 +270,7 @@
       if (result.success && result.user) {
         // Update stored user data with latest from server
         const token = localStorage.getItem('myngenda_token');
-        if (token) {
-          storeAuthData(result.user, token);
-        }
+        storeAuthData(result.user, token || '');
         
         return {
           success: true,
@@ -319,42 +341,6 @@
     }
   }
 
-  // Verify connection to backend
-  async function verifyConnection() {
-    try {
-      const apiBaseUrl = detectApiBaseUrl();
-      console.log('Verifying connection to:', apiBaseUrl);
-      
-      const response = await fetch(`${apiBaseUrl}/api/auth/check`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Connection verified:', data);
-        return {
-          success: true,
-          data
-        };
-      }
-      
-      return {
-        success: false,
-        message: `Connection failed: ${response.status} ${response.statusText}`
-      };
-    } catch (error) {
-      console.error('Connection verification failed:', error);
-      return {
-        success: false,
-        message: error.message
-      };
-    }
-  }
-
   // Export public methods
   window.MyngendaAuth = {
     login,
@@ -366,7 +352,6 @@
     googleAuth,
     redirectToDashboard,
     checkAuthStatus,
-    verifyConnection,
     fetchCurrentUser
   };
 
@@ -377,7 +362,7 @@
     
     // If the URL has ?debug=true, verify connection
     if (window.location.search.includes('debug=true')) {
-      verifyConnection().then(result => {
+      fetchCurrentUser().then(result => {
         console.log('Connection test result:', result);
       });
     }
