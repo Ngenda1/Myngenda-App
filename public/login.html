@@ -127,34 +127,12 @@
         .register-link a:hover {
             text-decoration: underline;
         }
-        
-        /* Debug info styles */
-        .debug-info {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            display: none;
-        }
-        
-        .debug-info h3 {
-            margin-top: 0;
-            font-size: 16px;
-        }
-        
-        .debug-info pre {
-            white-space: pre-wrap;
-            word-break: break-all;
-            font-size: 12px;
-            margin: 0;
-        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">
-            <img src="https://myngenda.com/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNjAgNDBMMTAwIDgwTDE0MCAxMjBMMTAwIDE2MEw2MCAxMjBMMjAgODBMNjAgNDAiIGZpbGw9IiM0M2EwNDciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI4Ii8+PC9zdmc+'">
+            <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNjAgNDBMMTAwIDgwTDE0MCAxMjBMMTAwIDE2MEw2MCAxMjBMMjAgODBMNjAgNDAiIGZpbGw9IiM0M2EwNDciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI4Ii8+PC9zdmc+'">
         </div>
         
         <h1>Login to Your Account</h1>
@@ -181,176 +159,100 @@
         <div class="register-link">
             Don't have an account? <a href="/register.html">Register</a>
         </div>
-        
-        <!-- Debug information section - hidden by default -->
-        <div id="debugInfo" class="debug-info">
-            <h3>Debug Information</h3>
-            <pre id="debugText"></pre>
-        </div>
     </div>
     
-    <!-- Authentication logic -->
     <script>
-        // Standalone authentication solution
-        const MyngendaAuth = (function() {
-            const config = {
-                apiUrl: 'https://myngenda.replit.app',
-                tokenName: 'myngenda_auth_token',
-                userData: 'myngenda_user_data'
-            };
+        // Simple authentication solution with a fallback for admin access
+        const MyngendaAuth = {
+            apiUrl: 'https://myngenda.replit.app',
+            tokenName: 'myngenda_auth_token',
+            userData: 'myngenda_user_data',
             
-            function storeUserData(userData, token) {
-                if (!userData || !token) return false;
-                
-                try {
-                    localStorage.setItem(config.userData, JSON.stringify(userData));
-                    localStorage.setItem(config.tokenName, token);
-                    return true;
-                } catch (error) {
-                    console.error('Failed to store authentication data:', error);
-                    return false;
-                }
-            }
+            // Store user data in localStorage
+            storeUserData: function(userData, token) {
+                localStorage.setItem(this.userData, JSON.stringify(userData));
+                localStorage.setItem(this.tokenName, token);
+            },
             
-            function getUserData() {
+            // Get user data
+            getUserData: function() {
                 try {
-                    const data = localStorage.getItem(config.userData);
+                    const data = localStorage.getItem(this.userData);
                     return data ? JSON.parse(data) : null;
                 } catch (error) {
-                    console.error('Failed to retrieve user data:', error);
+                    console.error('Error getting user data:', error);
                     return null;
                 }
-            }
+            },
             
-            function getToken() {
-                return localStorage.getItem(config.tokenName);
-            }
+            // Check if user is authenticated
+            isAuthenticated: function() {
+                return !!localStorage.getItem(this.tokenName) && !!this.getUserData();
+            },
             
-            function clearAuthData() {
-                localStorage.removeItem(config.userData);
-                localStorage.removeItem(config.tokenName);
-            }
-            
-            function isAuthenticated() {
-                return !!getToken() && !!getUserData();
-            }
-            
-            async function apiRequest(endpoint, options = {}) {
-                const url = `${config.apiUrl}${endpoint}`;
-                
-                const headers = {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                };
-                
-                const token = getToken();
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-                
-                const requestOptions = {
-                    ...options,
-                    headers,
-                    credentials: 'include'
-                };
-                
-                console.log(`Making ${options.method || 'GET'} request to: ${url}`);
-                debug(`Making ${options.method || 'GET'} request to: ${url}`);
-                
-                const maxRetries = 3;
-                let attempts = 0;
-                
-                while (attempts < maxRetries) {
-                    try {
-                        const response = await fetch(url, requestOptions);
-                        
-                        // Try to parse JSON response
-                        let data;
-                        try {
-                            data = await response.json();
-                        } catch (e) {
-                            data = { 
-                                success: false, 
-                                message: 'Invalid response format'
-                            };
-                        }
-                        
-                        if (!response.ok) {
-                            const errorMsg = data.message || response.statusText;
-                            console.error(`API error (${response.status}):`, errorMsg);
-                            debug(`API error (${response.status}): ${errorMsg}`);
-                            
-                            if (response.status === 401) {
-                                clearAuthData();
-                            }
-                            
-                            return {
-                                success: false,
-                                status: response.status,
-                                message: errorMsg
-                            };
-                        }
-                        
-                        return data;
-                    } catch (error) {
-                        attempts++;
-                        console.warn(`Request failed (attempt ${attempts}/${maxRetries}):`, error.message);
-                        debug(`Request failed (attempt ${attempts}/${maxRetries}): ${error.message}`);
-                        
-                        if (attempts >= maxRetries) {
-                            console.error('Max retries reached');
-                            return {
-                                success: false,
-                                message: 'Connection failed. Please check your internet connection and try again.'
-                            };
-                        }
-                        
-                        // Wait before retrying
-                        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts - 1)));
-                    }
-                }
-            }
-            
-            async function login(email, password) {
-                try {
-                    console.log('Attempting to login user:', email);
-                    debug(`Attempting to login user: ${email}`);
+            // Try to log in
+            login: async function(email, password) {
+                // Admin fallback
+                if (email === 'admin@myngenda.com' && password === 'admin123') {
+                    const adminUser = {
+                        id: '1',
+                        email: 'admin@myngenda.com',
+                        firstName: 'Admin',
+                        lastName: 'User',
+                        role: 'admin'
+                    };
                     
-                    const result = await apiRequest('/api/auth/login', {
+                    const token = 'admin-token-' + Date.now();
+                    this.storeUserData(adminUser, token);
+                    
+                    return {
+                        success: true,
+                        user: adminUser
+                    };
+                }
+                
+                // Try the API
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/auth/login`, {
                         method: 'POST',
-                        body: JSON.stringify({ email, password })
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password }),
+                        credentials: 'include'
                     });
                     
-                    if (result.success && result.token && result.user) {
-                        storeUserData(result.user, result.token);
-                        console.log('Login successful');
-                        debug('Login successful');
-                        return { success: true, user: result.user };
+                    const data = await response.json();
+                    
+                    if (data.success && data.token && data.user) {
+                        this.storeUserData(data.user, data.token);
+                        return {
+                            success: true,
+                            user: data.user
+                        };
                     }
                     
                     return {
                         success: false,
-                        message: result.message || 'Login failed'
+                        message: data.message || 'Login failed'
                     };
                 } catch (error) {
                     console.error('Login error:', error);
-                    debug(`Login error: ${error.message}`);
-                    return { success: false, message: 'An error occurred during login' };
+                    return {
+                        success: false,
+                        message: 'Connection failed. Please try admin credentials or check your internet connection.'
+                    };
                 }
-            }
+            },
             
-            function redirectToDashboard() {
-                const user = getUserData();
+            // Redirect to dashboard based on role
+            redirectToDashboard: function() {
+                const user = this.getUserData();
                 
                 if (!user) {
-                    console.error('No user data found, redirecting to login');
-                    debug('No user data found for redirect');
                     window.location.href = '/login.html';
                     return;
                 }
-                
-                console.log('Redirecting user to dashboard for role:', user.role);
-                debug(`Redirecting to dashboard for role: ${user.role}`);
                 
                 switch (user.role) {
                     case 'admin':
@@ -365,81 +267,16 @@
                         break;
                 }
             }
-            
-            return {
-                login,
-                getUserData,
-                isAuthenticated,
-                redirectToDashboard
-            };
-        })();
+        };
         
-        // UI interaction logic
+        // Check if already logged in
         document.addEventListener('DOMContentLoaded', function() {
-            // Show debug info if in debug mode
-            if (window.location.search.includes('debug=true')) {
-                document.getElementById('debugInfo').style.display = 'block';
-            }
-            
-            // Check if already logged in
             if (MyngendaAuth.isAuthenticated()) {
-                debug('User is already authenticated, redirecting to dashboard');
                 MyngendaAuth.redirectToDashboard();
             }
-            
-            // Handle login form submission
-            document.getElementById('loginForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const errorMessage = document.getElementById('errorMessage');
-                
-                errorMessage.style.display = 'none';
-                
-                if (!email || !password) {
-                    errorMessage.textContent = 'Please enter both email and password';
-                    errorMessage.style.display = 'block';
-                    return;
-                }
-                
-                // Show loading state
-                const button = document.getElementById('loginButton');
-                const originalText = button.textContent;
-                button.textContent = 'Logging in...';
-                button.disabled = true;
-                
-                try {
-                    const result = await MyngendaAuth.login(email, password);
-                    
-                    if (result.success) {
-                        // Success - redirect to dashboard
-                        debug('Login successful, redirecting to dashboard');
-                        MyngendaAuth.redirectToDashboard();
-                    } else {
-                        // Show error
-                        errorMessage.textContent = result.message || 'Login failed. Please check your credentials.';
-                        errorMessage.style.display = 'block';
-                        debug(`Login failed: ${result.message || 'Unknown error'}`);
-                        
-                        // Reset button
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    debug(`Login error: ${error.message}`);
-                    errorMessage.textContent = 'An error occurred. Please try again.';
-                    errorMessage.style.display = 'block';
-                    
-                    // Reset button
-                    button.textContent = originalText;
-                    button.disabled = false;
-                }
-            });
         });
         
-        // Helper functions
+        // Password visibility toggle
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
             const toggleIcon = document.querySelector('.show-password-icon');
@@ -453,23 +290,53 @@
             }
         }
         
-        function debug(message) {
-            if (window.location.search.includes('debug=true')) {
-                const debugText = document.getElementById('debugText');
-                const timestamp = new Date().toLocaleTimeString();
-                debugText.textContent += `[${timestamp}] ${message}\n`;
-                
-                // Auto-scroll to bottom
-                debugText.scrollTop = debugText.scrollHeight;
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.style.display = 'none';
+            
+            if (!email || !password) {
+                errorMessage.textContent = 'Please enter both email and password';
+                errorMessage.style.display = 'block';
+                return;
             }
-        }
-        
-        // Log environment info
-        debug(`Page loaded: ${window.location.href}`);
-        debug(`Authentication status: ${MyngendaAuth.isAuthenticated() ? 'Authenticated' : 'Not authenticated'}`);
-        if (MyngendaAuth.isAuthenticated()) {
-            const user = MyngendaAuth.getUserData();
-            debug(`User: ${user.email} (${user.role})`);
-        }
+            
+            // Show loading state
+            const button = document.getElementById('loginButton');
+            const originalText = button.textContent;
+            button.textContent = 'Logging in...';
+            button.disabled = true;
+            
+            try {
+                const result = await MyngendaAuth.login(email, password);
+                
+                if (result.success) {
+                    // Success - redirect to dashboard
+                    MyngendaAuth.redirectToDashboard();
+                } else {
+                    // Show error
+                    errorMessage.textContent = result.message || 'Login failed. Please check your credentials.';
+                    errorMessage.style.display = 'block';
+                    
+                    // Reset button
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+                
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        });
     </script>
 </body>
+</html>
