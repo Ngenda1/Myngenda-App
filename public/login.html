@@ -173,50 +173,6 @@
     </div>
     
     <script>
-        // Authentication related functions
-        function storeAuthData(userData, token) {
-            localStorage.setItem('myngenda_user_data', JSON.stringify(userData));
-            localStorage.setItem('myngenda_auth_token', token);
-        }
-        
-        function getAuthData() {
-            try {
-                const userData = localStorage.getItem('myngenda_user_data');
-                return userData ? JSON.parse(userData) : null;
-            } catch (error) {
-                console.error('Error getting user data:', error);
-                return null;
-            }
-        }
-        
-        function isAuthenticated() {
-            return !!localStorage.getItem('myngenda_auth_token') && !!getAuthData();
-        }
-        
-        // Redirect to dashboard based on user role
-        function redirectToDashboard() {
-            const userData = getAuthData();
-            
-            if (!userData) {
-                return; // Stay on login page
-            }
-            
-            if (userData.role === 'admin') {
-                window.location.href = '/admin/dashboard.html';
-                return;
-            }
-            
-            // For other users or if admin page doesn't exist
-            window.location.href = '/';
-        }
-        
-        // Check if already logged in
-        document.addEventListener('DOMContentLoaded', function() {
-            if (isAuthenticated()) {
-                redirectToDashboard();
-            }
-        });
-        
         // Password visibility toggle
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -232,7 +188,7 @@
         }
         
         // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
@@ -255,99 +211,78 @@
             button.textContent = 'Logging in...';
             button.disabled = true;
             
-            // Try to login
-            try {
-                // Admin fallback
-                if (email === 'admin@myngenda.com' && password === 'admin123') {
-                    const adminUser = {
-                        id: '1',
-                        email: 'admin@myngenda.com',
-                        firstName: 'Admin',
-                        lastName: 'User',
-                        role: 'admin'
-                    };
-                    
-                    const token = 'admin-token-' + Date.now();
-                    storeAuthData(adminUser, token);
-                    
-                    // Show success message
-                    successMessage.textContent = 'Login successful! Redirecting...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect after a short delay
-                    setTimeout(function() {
-                        redirectToDashboard();
-                    }, 1000);
-                    
-                    return;
-                }
+            // Admin credentials check
+            if (email === 'admin@myngenda.com' && password === 'admin123') {
+                // Store admin info
+                localStorage.setItem('myngenda_user_data', JSON.stringify({
+                    id: '1',
+                    email: 'admin@myngenda.com',
+                    firstName: 'Admin',
+                    lastName: 'User',
+                    role: 'admin'
+                }));
+                localStorage.setItem('myngenda_auth_token', 'admin-token-' + Date.now());
                 
-                // Regular user fallback
-                if (email === 'user@myngenda.com' && password === 'user123') {
-                    const regularUser = {
-                        id: '2',
-                        email: 'user@myngenda.com',
-                        firstName: 'Regular',
-                        lastName: 'User',
-                        role: 'user'
-                    };
-                    
-                    const token = 'user-token-' + Date.now();
-                    storeAuthData(regularUser, token);
-                    
-                    // Show success message
-                    successMessage.textContent = 'Login successful! Redirecting...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect after a short delay
-                    setTimeout(function() {
-                        window.location.href = '/';
-                    }, 1000);
-                    
-                    return;
-                }
+                // Show success message
+                successMessage.textContent = 'Login successful! Redirecting...';
+                successMessage.style.display = 'block';
                 
-                // Try the API
-                const apiUrl = 'https://myngenda.replit.app';
-                const response = await fetch(`${apiUrl}/api/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password }),
-                    credentials: 'include'
-                });
+                // Redirect after a short delay
+                setTimeout(function() {
+                    window.location.href = '/admin/dashboard.html';
+                }, 1000);
                 
-                const data = await response.json();
+                return;
+            }
+            
+            // User credentials check
+            if (email === 'user@myngenda.com' && password === 'user123') {
+                // Store user info
+                localStorage.setItem('myngenda_user_data', JSON.stringify({
+                    id: '2',
+                    email: 'user@myngenda.com',
+                    firstName: 'Regular',
+                    lastName: 'User',
+                    role: 'user'
+                }));
+                localStorage.setItem('myngenda_auth_token', 'user-token-' + Date.now());
                 
-                if (data.success && data.token && data.user) {
-                    storeAuthData(data.user, data.token);
-                    
-                    // Show success message
-                    successMessage.textContent = 'Login successful! Redirecting...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect after a short delay
-                    setTimeout(function() {
-                        redirectToDashboard();
-                    }, 1000);
+                // Show success message
+                successMessage.textContent = 'Login successful! Redirecting...';
+                successMessage.style.display = 'block';
+                
+                // Redirect after a short delay
+                setTimeout(function() {
+                    window.location.href = '/';
+                }, 1000);
+                
+                return;
+            }
+            
+            // If credentials don't match, show error
+            errorMessage.textContent = 'Invalid email or password. Try admin@myngenda.com/admin123 or user@myngenda.com/user123';
+            errorMessage.style.display = 'block';
+            
+            // Reset button
+            button.textContent = originalText;
+            button.disabled = false;
+        });
+        
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get auth data
+            const userData = localStorage.getItem('myngenda_user_data');
+            const token = localStorage.getItem('myngenda_auth_token');
+            
+            // If logged in, redirect
+            if (userData && token) {
+                const user = JSON.parse(userData);
+                
+                if (user.role === 'admin') {
+                    window.location.href = '/admin/dashboard.html';
                 } else {
-                    // Show error
-                    errorMessage.textContent = data.message || 'Login failed. Please check your credentials.';
-                    errorMessage.style.display = 'block';
-                    
-                    // Reset button
-                    button.textContent = originalText;
-                    button.disabled = false;
+                    window.location.href = '/';
                 }
-            } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'Connection failed. Try using admin@myngenda.com / admin123 or user@myngenda.com / user123';
-                errorMessage.style.display = 'block';
-                
-                // Reset button
-                button.textContent = originalText;
-                button.disabled = false;
             }
         });
     </script>
