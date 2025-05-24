@@ -43,8 +43,9 @@
   }
   
   // Get stored token
-  function getToken() {
-    return localStorage.getItem(config.tokenName);
+function getToken() {
+  return localStorage.getItem(config.tokenName);
+
   }
   
   // Clear authentication data
