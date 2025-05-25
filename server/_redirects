@@ -1,4 +1,0 @@
-# Netlify redirect rules
-# This proxies all API requests to your Replit backend
-
-/api/*  https://myngenda-app.replit.app/api/:splat  200
