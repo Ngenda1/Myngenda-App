@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myngenda User Dashboard</title>
     <style>
+        /* Include CSS directly in the page to avoid external file issues */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         
         header {
@@ -48,16 +52,76 @@
             padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .nav-item.active {
+            background-color: #e8f5e9;
+            border-left: 3px solid #43a047;
+            color: #43a047;
+            font-weight: 500;
+        }
+        
+        .nav-item-icon {
+            width: 20px;
+            text-align: center;
+            margin-right: 10px;
         }
         
         .main-content {
-            max-width: 1200px;
-            margin: 0 auto;
+            flex: 1;
             padding: 20px;
         }
         
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin: 0;
+        }
+        
+        .date {
+            color: #666;
+            font-size: 14px;
+        }
+        
         .welcome-card {
-            background-color: white;
+            background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 20px;
@@ -69,34 +133,248 @@
             margin-top: 0;
         }
         
-        .dashboard-grid {
+        .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
-        .dashboard-card {
-            background-color: white;
+        .stat-card {
+            background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
-        .dashboard-card h3 {
+        .stat-title {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
             color: #333;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .recent-orders {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            color: #333;
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .view-all {
+            color: #43a047;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status.delivered {
+            background-color: #e8f5e9;
+            color: #43a047;
+        }
+        
+        .status.in-transit {
+            background-color: #fff8e1;
+            color: #ffa000;
+        }
+        
+        .status.pending {
+            background-color: #f5f5f5;
+            color: #757575;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #43a047;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 14px;
+        }
+        
+        .action-btn:hover {
+            text-decoration: underline;
+        }
+        
+        .cta-card {
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .cta-card h3 {
+            color: #2e7d32;
             margin-top: 0;
         }
         
-        .stat {
-            font-size: 24px;
-            font-weight: bold;
+        .cta-btn {
+            background-color: #43a047;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .cta-btn:hover {
+            background-color: #2e7d32;
+        }
+        
+        .activity-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
             color: #43a047;
-            margin: 10px 0;
+            font-size: 18px;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .activity-time {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        /* Special styling for demo account */
+        .demo-badge {
+            background-color: #e8f5e9;
+            color: #43a047;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
+    <!-- Auth verification happens here, before any content is shown -->
+    <script>
+        // Immediately check auth to prevent flashing of content
+        (function() {
+            // Add console logs to help debug
+            console.log("Checking authentication...");
+            
+            // Check for authentication
+            const token = localStorage.getItem('myngenda_auth_token');
+            const userData = localStorage.getItem('myngenda_user_data');
+            
+            console.log("Token exists:", !!token);
+            console.log("User data exists:", !!userData);
+            
+            // If no token or user data, redirect to login
+            if (!token || !userData) {
+                console.log("No authentication found, redirecting to login");
+                window.location.replace('/login.html');
+                // Stop execution
+                throw new Error("Authentication required");
+            }
+            
+            // Try to parse user data
+            try {
+                const user = JSON.parse(userData);
+                console.log("User role:", user.role);
+                
+                // If this is the admin dashboard but user is not admin, redirect
+                if (window.location.pathname.includes('/admin/') && user.role !== 'admin') {
+                    console.log("User is not admin, redirecting");
+                    window.location.replace('/user/dashboard.html');
+                    throw new Error("Admin access required");
+                }
+            } catch (error) {
+                console.error("Error parsing user data:", error);
+                window.location.replace('/login.html');
+                throw new Error("Invalid user data");
+            }
+            
+            console.log("Authentication successful!");
+        })();
+    </script>
+    
     <header>
         <div class="logo">
             <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNjAgNDBMMTAwIDgwTDE0MCAxMjBMMTAwIDE2MEw2MCAxMjBMMjAgODBMNjAgNDAiIGZpbGw9IiM0M2EwNDciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI4Ii8+PC9zdmc+'">
@@ -109,73 +387,210 @@
         </div>
     </header>
     
-    <div class="main-content">
-        <div class="welcome-card">
-            <h2 id="welcomeMessage">Welcome to your dashboard!</h2>
-            <p>Track your deliveries, schedule pickups, and manage your account all in one place.</p>
+    <div class="container">
+        <div class="sidebar">
+            <a href="#" class="nav-item active">
+                <span class="nav-item-icon">📊</span>
+                Dashboard
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">📦</span>
+                My Deliveries
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">🚚</span>
+                Schedule Pickup
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">📍</span>
+                Track Package
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">💰</span>
+                Payments
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">⚙️</span>
+                Account Settings
+            </a>
         </div>
         
-        <div class="dashboard-grid">
-            <div class="dashboard-card">
-                <h3>Active Deliveries</h3>
-                <div class="stat">3</div>
-                <p>You have 3 packages in transit</p>
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h1>My Dashboard</h1>
+                <div class="date" id="currentDate">May 24, 2025</div>
             </div>
             
-            <div class="dashboard-card">
-                <h3>Completed Deliveries</h3>
-                <div class="stat">12</div>
-                <p>Successfully delivered this month</p>
+            <div class="welcome-card">
+                <h2 id="welcomeMessage">Welcome back!</h2>
+                <p>Track your deliveries, schedule pickups, and manage your account all in one place.</p>
             </div>
             
-            <div class="dashboard-card">
-                <h3>Schedule a Pickup</h3>
-                <p>Need to send a package? We'll pick it up!</p>
-                <button style="background-color: #43a047; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Schedule Now</button>
+            <div class="cta-card">
+                <h3>Need to send a package?</h3>
+                <p>Schedule a pickup and we'll handle the rest!</p>
+                <button class="cta-btn">Schedule Now</button>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">Active Deliveries</div>
+                    <div class="stat-value">3</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">Completed Deliveries</div>
+                    <div class="stat-value">12</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">Total Spending</div>
+                    <div class="stat-value">$156.50</div>
+                </div>
+            </div>
+            
+            <div class="recent-orders">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Deliveries</h2>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Destination</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#ORD-5689</td>
+                            <td>123 Main St, Nairobi</td>
+                            <td>May 23, 2025</td>
+                            <td><span class="status delivered">Delivered</span></td>
+                            <td><button class="action-btn">View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-5683</td>
+                            <td>456 Park Ave, Mombasa</td>
+                            <td>May 22, 2025</td>
+                            <td><span class="status in-transit">In Transit</span></td>
+                            <td><button class="action-btn">Track</button></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-5681</td>
+                            <td>789 Oak Rd, Kisumu</td>
+                            <td>May 21, 2025</td>
+                            <td><span class="status in-transit">In Transit</span></td>
+                            <td><button class="action-btn">Track</button></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-5680</td>
+                            <td>321 Pine St, Nakuru</td>
+                            <td>May 20, 2025</td>
+                            <td><span class="status pending">Pending</span></td>
+                            <td><button class="action-btn">Cancel</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="activity-card">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Activity</h2>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon">📦</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Your package #ORD-5689 has been delivered</div>
+                        <div class="activity-time">Today, 10:23 AM</div>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon">🚚</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Your package #ORD-5683 is out for delivery</div>
+                        <div class="activity-time">Yesterday, 5:41 PM</div>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon">💰</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Payment of $42.50 received for #ORD-5681</div>
+                        <div class="activity-time">May 21, 2025, 3:15 PM</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
-        // Check authentication before displaying content
-        (function() {
-            // Check for authentication
-            const token = localStorage.getItem('myngenda_auth_token');
-            const userData = localStorage.getItem('myngenda_user_data');
+        // This script runs after the page is loaded and authentication is verified
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             
-            if (!token || !userData) {
-                // Not authenticated, redirect to login
-                window.location.href = '/login.html';
-                return;
-            }
-            
+            // Display user information
             try {
-                // Display user name
-                const user = JSON.parse(userData);
-                const userName = document.getElementById('userName');
-                const welcomeMessage = document.getElementById('welcomeMessage');
-                
-                if (user && user.firstName) {
-                    userName.textContent = user.firstName + ' ' + (user.lastName || '');
-                    welcomeMessage.textContent = 'Welcome, ' + user.firstName + '!';
-                }
-                
-                // If this is an admin user, redirect to admin dashboard
-                if (user && user.role === 'admin') {
-                    window.location.href = '/admin/dashboard.html';
+                const userData = localStorage.getItem('myngenda_user_data');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    
+                    // Update username in header
+                    const userNameElement = document.getElementById('userName');
+                    const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+                    userNameElement.textContent = name || 'User';
+                    
+                    // Special handling for demo account
+                    if (user.email === 'user@myngenda.com') {
+                        // Add demo badge
+                        const demoBadge = document.createElement('span');
+                        demoBadge.className = 'demo-badge';
+                        demoBadge.textContent = 'Demo Account';
+                        userNameElement.appendChild(demoBadge);
+                        
+                        // Set special welcome message
+                        const welcomeMessage = document.getElementById('welcomeMessage');
+                        welcomeMessage.textContent = `Welcome to the demo account!`;
+                    } else {
+                        // Regular welcome message
+                        const welcomeMessage = document.getElementById('welcomeMessage');
+                        welcomeMessage.textContent = `Welcome back, ${user.firstName || 'User'}!`;
+                    }
                 }
             } catch (e) {
-                console.error('Error parsing user data:', e);
-                // Redirect to login on error
-                window.location.href = '/login.html';
+                console.error('Error displaying user information:', e);
             }
-        })();
-        
-        // Handle logout
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('myngenda_auth_token');
-            localStorage.removeItem('myngenda_user_data');
-            window.location.href = '/login.html';
+            
+            // Handle logout with multiple safeguards
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Clear all auth data to be safe
+                localStorage.removeItem('myngenda_auth_token');
+                localStorage.removeItem('myngenda_user_data');
+                sessionStorage.removeItem('myngenda_auth_token');
+                sessionStorage.removeItem('myngenda_user_data');
+                
+                // Clear any cookies that might be related to auth
+                document.cookie.split(';').forEach(function(c) {
+                    document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
+                });
+                
+                // Redirect to login page with query param to prevent caching
+                window.location.href = '/login.html?logout=' + Date.now();
+            });
         });
     </script>
 </body>
