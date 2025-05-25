@@ -264,6 +264,56 @@
     </div>
     
     <script>
+        // API base URL detection
+        function getApiBaseUrl() {
+            // In production, API calls will be proxied through Netlify
+            // In development, direct calls to the Replit server
+            const isLocalhost = window.location.hostname === 'localhost' || 
+                                window.location.hostname === '127.0.0.1';
+                                
+            return isLocalhost 
+                ? 'https://myngenda-app.replit.app/api' 
+                : '/api'; // Will be proxied through Netlify
+        }
+        
+        // Function to make API requests
+        async function apiRequest(endpoint, options = {}) {
+            const baseUrl = getApiBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+            
+            // Default headers
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            // Add auth token if available
+            const token = localStorage.getItem('myngenda_auth_token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+                
+                // Parse the JSON response
+                const data = await response.json();
+                
+                // Check if the request was successful
+                if (!response.ok) {
+                    throw new Error(data.message || 'An error occurred');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API request error:', error);
+                throw error;
+            }
+        }
+        
         // Password visibility toggle
         function togglePasswordVisibility(fieldId) {
             const passwordInput = document.getElementById(fieldId);
@@ -333,7 +383,7 @@
                     if (user.role === 'admin') {
                         window.location.href = '/admin/dashboard.html';
                     } else {
-                        window.location.href = '/';
+                        window.location.href = '/user/dashboard.html';
                     }
                 } catch (e) {
                     console.error('Error parsing user data:', e);
@@ -342,7 +392,7 @@
         });
         
         // Handle registration form submission
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Validate form
@@ -391,30 +441,55 @@
             button.textContent = 'Creating Account...';
             button.disabled = true;
             
-            // Create a new user and redirect
-            // This is a simplified version that always succeeds
-            successMessage.textContent = 'Account created successfully! Redirecting to login...';
-            successMessage.style.display = 'block';
-            
-            // Create a new user
-            const newUser = {
-                id: Date.now().toString(),
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                phone: phone,
-                role: 'user'
+            // Create a new user data object
+            const userData = {
+                firstName,
+                lastName,
+                email,
+                phone,
+                password,
+                role: 'user' // Default role for new registrations
             };
             
-            // Save to session storage (more temporary than localStorage)
-            // This allows the login page to retrieve and verify these credentials
-            sessionStorage.setItem('pending_user', JSON.stringify(newUser));
-            sessionStorage.setItem('pending_password', password);
-            
-            // Redirect to login page after a short delay
-            setTimeout(function() {
-                window.location.href = '/login.html';
-            }, 1500);
+            try {
+                // Call the API to register the user
+                const response = await apiRequest('/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify(userData)
+                });
+                
+                // Show success message
+                successMessage.textContent = 'Account created successfully! Redirecting to login...';
+                successMessage.style.display = 'block';
+                
+                // Fallback: If the API doesn't return user data, create a temporary user object
+                const newUser = response.user || {
+                    id: Date.now().toString(),
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    role: 'user'
+                };
+                
+                // Save to session storage for the login page
+                sessionStorage.setItem('pending_user', JSON.stringify(newUser));
+                sessionStorage.setItem('pending_password', password);
+                
+                // Redirect to login page after a short delay
+                setTimeout(function() {
+                    window.location.href = '/login.html';
+                }, 1500);
+                
+            } catch (error) {
+                // Show error message
+                errorMessage.textContent = error.message || 'Error creating account. Please try again.';
+                errorMessage.style.display = 'block';
+                
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+            }
         });
     </script>
 </body>
