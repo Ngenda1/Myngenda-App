@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyNgenda - Secure Login</title>
+  <style>
+    :root {
+      --primary-color: #43a047;
+      --primary-dark: #2e7d32;
+      --accent-color: #ffc107;
+      --text-color: #333;
+      --light-text: #666;
+      --lighter-text: #999;
+      --error-color: #f44336;
+      --success-color: #4caf50;
+      --border-color: #ddd;
+      --light-bg: #f5f5f5;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .auth-image {
+      flex: 1;
+      background-image: url('https://images.unsplash.com/photo-1601814933824-fd0b574dd592?q=80&w=1000');
+      background-size: cover;
+      background-position: center;
+      display: none;
+    }
+    
+    .auth-form-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .auth-box {
+      background: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .logo {
+      max-width: 180px;
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+      color: var(--light-text);
+      font-size: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    .btn {
+      display: inline-block;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+      font-weight: 600;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--light-text);
+    }
+    
+    .auth-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+    
+    .login-form, .register-form {
+      display: none;
+    }
+    
+    .active {
+      display: block;
+    }
+    
+    .alert {
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-col {
+      flex: 1;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      display: none;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .btn-loading .loading {
+      display: inline-block;
+    }
+    
+    .btn-loading {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+    
+    /* Responsive */
+    @media (min-width: 768px) {
+      .auth-image {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-image"></div>
+    <div class="auth-form-container">
+      <div class="auth-box">
+        <div class="auth-header">
+          <img src="https://via.placeholder.com/180x60?text=MyNgenda" alt="MyNgenda Logo" class="logo">
+          <h1 id="auth-title">Welcome Back</h1>
+          <p class="auth-subtitle" id="auth-subtitle">Sign in to access your account</p>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="login-form" class="login-form active">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="btn" id="login-btn">
+            <span class="loading"></span>
+            Sign In
+          </button>
+        </form>
+        
+        <form id="register-form" class="register-form">
+          <div class="form-row">
+            <div class="form-col">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" placeholder="First name" required>
+            </div>
+            <div class="form-col">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" placeholder="Last name" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="Enter your phone number" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Create a password" required>
+          </div>
+          <button type="submit" class="btn" id="register-btn">
+            <span class="loading"></span>
+            Create Account
+          </button>
+        </form>
+        
+        <div class="auth-footer">
+          <p id="login-text">Don't have an account? <a class="auth-link" id="show-register">Sign Up</a></p>
+          <p id="register-text" style="display: none;">Already have an account? <a class="auth-link" id="show-login">Sign In</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Detect API base URL based on current environment
+    function detectApiBaseUrl() {
+      // For development inside Replit
+      if (window.location.hostname.includes('replit.dev') || 
+          window.location.hostname === 'localhost' || 
+          window.location.hostname.includes('replit.app')) {
+        return ''; // Same-origin for Replit hosting
+      }
+      
+      // For production/Netlify
+      return 'https://myngenda.replit.app'; // Use the Replit app URL for external hosting
+    }
+    
+    // Auth State Management
+    function storeAuthData(user, token) {
+      localStorage.setItem('myngenda_auth_token', token);
+      localStorage.setItem('myngenda_user', JSON.stringify(user));
+    }
+    
+    function clearAuthData() {
+      localStorage.removeItem('myngenda_auth_token');
+      localStorage.removeItem('myngenda_user');
+    }
+    
+    function isAuthenticated() {
+      return !!localStorage.getItem('myngenda_auth_token');
+    }
+    
+    function getCurrentUser() {
+      const userStr = localStorage.getItem('myngenda_user');
+      return userStr ? JSON.parse(userStr) : null;
+    }
+    
+    // Redirect to the appropriate dashboard based on user role
+    function redirectToDashboard() {
+      const user = getCurrentUser();
+      if (!user) return;
+      
+      if (user.role === 'admin') {
+        window.location.href = '/admin-dashboard.html';
+      } else if (user.role === 'driver') {
+        window.location.href = '/driver-dashboard.html';
+      } else {
+        window.location.href = '/dashboard.html';
+      }
+    }
+    
+    // Show alert message
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert alert-${type}`;
+      alert.style.display = 'block';
+      
+      // Automatically hide after 5 seconds
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Toggle between login and register forms
+    document.getElementById('show-register').addEventListener('click', () => {
+      document.getElementById('login-form').classList.remove('active');
+      document.getElementById('register-form').classList.add('active');
+      document.getElementById('login-text').style.display = 'none';
+      document.getElementById('register-text').style.display = 'block';
+      document.getElementById('auth-title').textContent = 'Create Account';
+      document.getElementById('auth-subtitle').textContent = 'Sign up to start using MyNgenda';
+    });
+    
+    document.getElementById('show-login').addEventListener('click', () => {
+      document.getElementById('register-form').classList.remove('active');
+      document.getElementById('login-form').classList.add('active');
+      document.getElementById('register-text').style.display = 'none';
+      document.getElementById('login-text').style.display = 'block';
+      document.getElementById('auth-title').textContent = 'Welcome Back';
+      document.getElementById('auth-subtitle').textContent = 'Sign in to access your account';
+    });
+    
+    // Handle login form submission
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const loginBtn = document.getElementById('login-btn');
+      loginBtn.classList.add('btn-loading');
+      loginBtn.disabled = true;
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      try {
+        const apiBaseUrl = detectApiBaseUrl();
+        const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showAlert('Login successful!', 'success');
+          storeAuthData(data.user, data.token);
+          
+          // Redirect after a brief delay to show success message
+          setTimeout(() => {
+            redirectToDashboard();
+          }, 1000);
+        } else {
+          showAlert(data.message || 'Login failed. Please check your credentials.', 'error');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showAlert('Connection error. Please try again later.', 'error');
+      } finally {
+        loginBtn.classList.remove('btn-loading');
+        loginBtn.disabled = false;
+      }
+    });
+    
+    // Handle register form submission
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const registerBtn = document.getElementById('register-btn');
+      registerBtn.classList.add('btn-loading');
+      registerBtn.disabled = true;
+      
+      const firstName = document.getElementById('first-name').value;
+      const lastName = document.getElementById('last-name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        const apiBaseUrl = detectApiBaseUrl();
+        const response = await fetch(`${apiBaseUrl}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            phone,
+            password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showAlert('Registration successful!', 'success');
+          
+          // Switch to login form
+          document.getElementById('register-form').classList.remove('active');
+          document.getElementById('login-form').classList.add('active');
+          document.getElementById('register-text').style.display = 'none';
+          document.getElementById('login-text').style.display = 'block';
+          document.getElementById('auth-title').textContent = 'Welcome Back';
+          document.getElementById('auth-subtitle').textContent = 'Sign in to access your account';
+          
+          // Auto-fill email field
+          document.getElementById('login-email').value = email;
+        } else {
+          showAlert(data.message || 'Registration failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showAlert('Connection error. Please try again later.', 'error');
+      } finally {
+        registerBtn.classList.remove('btn-loading');
+        registerBtn.disabled = false;
+      }
+    });
+    
+    // Check if user is already logged in
+    window.addEventListener('DOMContentLoaded', () => {
+      if (isAuthenticated()) {
+        redirectToDashboard();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,479 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myngenda Login</title>
-    <style>
-        /* Include CSS directly in the page to avoid external file issues */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        .login-container {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            padding: 30px;
-            margin: 20px;
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .logo img {
-            max-width: 150px;
-        }
-        
-        h1 {
-            color: #43a047;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        
-        input:focus {
-            border-color: #43a047;
-            outline: none;
-        }
-        
-        .password-toggle {
-            position: relative;
-        }
-        
-        .show-password-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
-            font-style: normal;
-            font-size: 14px;
-        }
-        
-        .remember-me {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .remember-me input {
-            width: auto;
-            margin-right: 10px;
-        }
-        
-        .remember-me label {
-            margin-bottom: 0;
-            font-weight: normal;
-        }
-        
-        button {
-            background-color: #43a047;
-            color: white;
-            border: none;
-            padding: 12px 0;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #2e7d32;
-        }
-        
-        button:disabled {
-            background-color: #9e9e9e;
-            cursor: not-allowed;
-        }
-        
-        .forgot-password {
-            text-align: center;
-            margin-top: 15px;
-        }
-        
-        .forgot-password a {
-            color: #43a047;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        
-        .forgot-password a:hover {
-            text-decoration: underline;
-        }
-        
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .register-link a {
-            color: #43a047;
-            text-decoration: none;
-        }
-        
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: #d32f2f;
-            margin-top: 16px;
-            text-align: center;
-            display: none;
-            padding: 8px;
-            background-color: #ffebee;
-            border-radius: 4px;
-        }
-        
-        .test-account-section {
-            margin-top: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-        
-        .test-account-section h3 {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .test-account-btn {
-            background-color: #f5f5f5;
-            color: #333;
-            padding: 8px 0;
-            margin-bottom: 8px;
-        }
-        
-        .test-account-btn:hover {
-            background-color: #e0e0e0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Myngenda - Sign In</title>
+  
+  <!-- Official Myngenda icon for browser tabs and bookmarks -->
+  <link rel="icon" href="icons/myngenda-icon.png" type="image/png">
+  
+  <!-- Apple Touch Icon (for iOS devices) -->
+  <link rel="apple-touch-icon" href="icons/myngenda-icon.png">
+  
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --primary-dark: #3b8c3f;
+      --accent-color: #424242;
+      --light-gray: #f5f5f5;
+      --text-color: #333;
+      --error-color: #f44336;
+      --success-color: #4CAF50;
+    }
+    
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-gray);
+      color: var(--text-color);
+      height: 100%;
+    }
+    
+    .login-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .login-form-container {
+      width: 100%;
+      max-width: 450px;
+      margin: auto;
+      padding: 40px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .login-logo {
+      width: 120px;
+      margin-bottom: 15px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--accent-color);
+      margin: 0;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--accent-color);
+    }
+    
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+    
+    .submit-button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .submit-button:hover {
+      background: var(--primary-dark);
+    }
+    
+    .login-footer {
+      text-align: center;
+      margin-top: 25px;
+    }
+    
+    .login-footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .error-message {
+      background-color: #ffebee;
+      color: var(--error-color);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    /* Loading animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid var(--light-gray);
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .success-message {
+      background-color: #e8f5e9;
+      color: var(--success-color);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">
-            <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNjAgNDBMMTAwIDgwTDE0MCAxMjBMMTAwIDE2MEw2MCAxMjBMMjAgODBMNjAgNDAiIGZpbGw9IiM0M2EwNDciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI4Ii8+PC9zdmc+'">
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Connecting to server...</div>
+  </div>
+  
+  <div class="login-container">
+    <div class="login-form-container">
+      <div class="login-header">
+        <img src="icons/myngenda-icon.png" alt="Myngenda Logo" class="login-logo">
+        <h1>Sign in to Myngenda</h1>
+      </div>
+      
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email">
         </div>
         
-        <h1>Welcome Back</h1>
-        
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="password-toggle">
-                    <input type="password" id="password" required>
-                    <i class="show-password-icon" onclick="togglePasswordVisibility()">Show</i>
-                </div>
-            </div>
-            
-            <div class="remember-me">
-                <input type="checkbox" id="rememberMe">
-                <label for="rememberMe">Remember me</label>
-            </div>
-            
-            <button type="submit" id="loginButton">Log In</button>
-            
-            <div id="errorMessage" class="error-message"></div>
-        </form>
-        
-        <div class="forgot-password">
-            <a href="#">Forgot password?</a>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
         </div>
         
-        <div class="register-link">
-            Don't have an account? <a href="/register.html">Register</a>
-        </div>
-        
-        <div class="test-account-section">
-            <h3>Test Accounts</h3>
-            <button type="button" class="test-account-btn" onclick="loginWithTestAccount('admin')">Login as Admin</button>
-            <button type="button" class="test-account-btn" onclick="loginWithTestAccount('user')">Login as User</button>
-        </div>
+        <button type="submit" class="submit-button">Sign In</button>
+      </form>
+      
+      <div style="margin-top: 25px; text-align: center;">
+        <p style="color: #666; margin-bottom: 15px;">Or sign in with</p>
+        <a href="#" id="googleAuthBtn" style="display: inline-block;">
+          <img src="icons/google-logo.png" 
+               alt="Sign in with Google" style="height: 40px; width: auto;">
+        </a>
+      </div>
+      
+      <div class="login-footer">
+        <p>Don't have an account? <a href="register.html">Create an account</a></p>
+      </div>
     </div>
+  </div>
+  
+  <!-- Load our enhanced authentication system -->
+  <script src="/auth-connector.js"></script>
+  
+  <script>
+    // Check if user just registered
+    document.addEventListener('DOMContentLoaded', function() {
+      if (sessionStorage.getItem('just_registered') === 'true') {
+        sessionStorage.removeItem('just_registered');
+        showSuccessMessage('Registration successful! Redirecting to dashboard...');
+        
+        // Auto redirect to dashboard
+        setTimeout(() => {
+          window.MyngendaAPI.redirectToDashboard();
+        }, 1500);
+      }
+      
+      // Check for login errors
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        showErrorMessage(decodeURIComponent(error));
+      }
+      
+      // Setup Google auth button
+      document.getElementById('googleAuthBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.MyngendaAPI.googleAuth();
+      });
+    });
     
-    <script>
-        // API base URL detection
-        function getApiBaseUrl() {
-            // In production, API calls will be proxied through Netlify
-            // In development, direct calls to the Replit server
-            const isLocalhost = window.location.hostname === 'localhost' || 
-                                window.location.hostname === '127.0.0.1';
-                                
-            return isLocalhost 
-                ? 'https://myngenda-app.replit.app/api' 
-                : '/api'; // Will be proxied through Netlify
-        }
+    function showErrorMessage(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    function showSuccessMessage(message) {
+      const successMessage = document.getElementById('successMessage');
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+    
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.style.display = 'none';
+      
+      // Show loading indicator
+      showLoading();
+      
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        console.log('Attempting to log in with:', email);
         
-        // Function to make API requests
-        async function apiRequest(endpoint, options = {}) {
-            const baseUrl = getApiBaseUrl();
-            const url = `${baseUrl}${endpoint}`;
-            
-            // Default headers
-            const headers = {
-                'Content-Type': 'application/json',
-                ...options.headers
-            };
-            
-            // Add auth token if available
-            const token = localStorage.getItem('myngenda_auth_token');
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-            
-            try {
-                const response = await fetch(url, {
-                    ...options,
-                    headers
-                });
-                
-                // Parse the JSON response
-                const data = await response.json();
-                
-                // Check if the request was successful
-                if (!response.ok) {
-                    throw new Error(data.message || 'An error occurred');
-                }
-                
-                return data;
-            } catch (error) {
-                console.error('API request error:', error);
-                throw error;
-            }
-        }
+        // Use our direct API connection
+        const result = await window.MyngendaAPI.login(email, password);
         
-        // Toggle password visibility
-        function togglePasswordVisibility() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.querySelector('.show-password-icon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.textContent = 'Hide';
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.textContent = 'Show';
-            }
-        }
+        console.log('Login successful:', result.user);
         
-        // Login with test account
-        function loginWithTestAccount(type) {
-            let email, password;
-            
-            if (type === 'admin') {
-                email = 'admin@myngenda.com';
-                password = 'admin123';
-            } else {
-                email = 'user@myngenda.com';
-                password = 'user123';
-            }
-            
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            
-            // Trigger login
-            handleLogin(email, password);
-        }
+        // Show success message
+        showSuccessMessage('Login successful! Redirecting to dashboard...');
         
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            handleLogin(email, password);
-        });
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.MyngendaAPI.redirectToDashboard();
+        }, 1500);
+      } catch (error) {
+        console.error('Login error:', error);
         
-        // Check if we have a pending user registration
-        function checkPendingRegistration() {
-            const pendingUser = sessionStorage.getItem('pending_user');
-            const pendingPassword = sessionStorage.getItem('pending_password');
-            
-            if (pendingUser && pendingPassword) {
-                try {
-                    const user = JSON.parse(pendingUser);
-                    const email = user.email;
-                    
-                    // Pre-fill the form with the new user's credentials
-                    document.getElementById('email').value = email;
-                    document.getElementById('password').value = pendingPassword;
-                    
-                    // Remove from session storage
-                    sessionStorage.removeItem('pending_user');
-                    sessionStorage.removeItem('pending_password');
-                } catch (e) {
-                    console.error('Error parsing pending user:', e);
-                }
-            }
-        }
+        // Hide loading and show error message
+        hideLoading();
+        showErrorMessage(error.message || 'Invalid email or password');
         
-        // Main login function
-        async function handleLogin(email, password) {
-            const errorMessage = document.getElementById('errorMessage');
-            const loginButton = document.getElementById('loginButton');
-            
-            // Hide previous error messages
-            errorMessage.style.display = 'none';
-            
-            // Show loading state
-            const originalText = loginButton.textContent;
-            loginButton.textContent = 'Logging in...';
-            loginButton.disabled = true;
-            
-            // Check for test accounts
-            if (email === 'admin@myngenda.com' && password === 'admin123') {
-                loginAsAdmin();
-                return;
-            }
-            
-            if (email === 'user@myngenda.com' && password === 'user123') {
-                loginAsUser();
-                return;
-            }
-            
-            // Check pending registration
-            const pendingUser = sessionStorage.getItem('pending_user');
-            if (pendingUser) {
-                try {
-                    const user = JSON.parse(pendingUser);
-                    const pendingPassword = sessionStorage.getItem('pending_password');
-                    
-                    if (email === user.email && password === pendingPassword) {
-                        // Login successful for newly registered user
-                        loginWithUserData(user, 'new_user_token_' + Date.now());
-                        return;
-                    }
-                } catch (e) {
-                    console.error('Error checking pending registration:', e);
-                }
-            }
-            
-            // Attempt real API login
-            try {
-                const loginData = await apiRequest('/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password })
-                });
-                
-                // Login successful - store user data and token
-                loginWithUserData(loginData.user, loginData.token);
-                
-            } catch (error) {
-                // Show error message
-                loginButton.textContent = originalText;
-                loginButton.disabled = false;
-                errorMessage.textContent = error.message || 'Invalid email or password';
-                errorMessage.style.display = 'block';
-            }
-        }
-        
-        // Login as admin test account
-        function loginAsAdmin() {
-            const adminUser = {
-                id: 'admin123',
-                firstName: 'Admin',
-                lastName: 'User',
-                email: 'admin@myngenda.com',
-                role: 'admin'
-            };
-            
-            loginWithUserData(adminUser, 'admin_token_' + Date.now());
-        }
-        
-        // Login as regular user test account
-        function loginAsUser() {
-            const regularUser = {
-                id: 'user456',
-                firstName: 'Test',
-                lastName: 'User',
-                email: 'user@myngenda.com',
-                role: 'user'
-            };
-            
-            loginWithUserData(regularUser, 'user_token_' + Date.now());
-        }
-        
-        // Store auth data and redirect
-        function loginWithUserData(user, token) {
-            // Store in localStorage
-            localStorage.setItem('myngenda_user_data', JSON.stringify(user));
-            localStorage.setItem('myngenda_auth_token', token);
-            
-            // Redirect based on role
-            if (user.role === 'admin') {
-                window.location.href = '/admin/dashboard.html';
-            } else {
-                window.location.href = '/user/dashboard.html';
-            }
-        }
-        
-        // Check for pending registration when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            checkPendingRegistration();
-            
-            // Check if already logged in
-            const userData = localStorage.getItem('myngenda_user_data');
-            const token = localStorage.getItem('myngenda_auth_token');
-            
-            if (userData && token) {
-                try {
-                    const user = JSON.parse(userData);
-                    if (user.role === 'admin') {
-                        window.location.href = '/admin/dashboard.html';
-                    } else {
-                        window.location.href = '/user/dashboard.html';
-                    }
-                } catch (e) {
-                    console.error('Error parsing user data:', e);
-                    // Clear invalid data
-                    localStorage.removeItem('myngenda_user_data');
-                    localStorage.removeItem('myngenda_auth_token');
-                }
-            }
-        });
-    </script>
+        // Reset button
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
+    });
+  </script>
 </body>
 </html>

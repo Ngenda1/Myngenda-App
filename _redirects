@@ -1,0 +1,7 @@
+# Netlify redirects file
+
+# API proxy to Replit backend
+/api/*  https://myngenda.replit.app/api/:splat  200
+
+# SPA fallback
+/*    /index.html   200
