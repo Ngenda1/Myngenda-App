@@ -234,6 +234,56 @@
     </div>
     
     <script>
+        // API base URL detection
+        function getApiBaseUrl() {
+            // In production, API calls will be proxied through Netlify
+            // In development, direct calls to the Replit server
+            const isLocalhost = window.location.hostname === 'localhost' || 
+                                window.location.hostname === '127.0.0.1';
+                                
+            return isLocalhost 
+                ? 'https://myngenda-app.replit.app/api' 
+                : '/api'; // Will be proxied through Netlify
+        }
+        
+        // Function to make API requests
+        async function apiRequest(endpoint, options = {}) {
+            const baseUrl = getApiBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+            
+            // Default headers
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            // Add auth token if available
+            const token = localStorage.getItem('myngenda_auth_token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+                
+                // Parse the JSON response
+                const data = await response.json();
+                
+                // Check if the request was successful
+                if (!response.ok) {
+                    throw new Error(data.message || 'An error occurred');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API request error:', error);
+                throw error;
+            }
+        }
+        
         // Toggle password visibility
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -294,9 +344,6 @@
                     // Remove from session storage
                     sessionStorage.removeItem('pending_user');
                     sessionStorage.removeItem('pending_password');
-                    
-                    // Show a welcome message (optional)
-                    // ...
                 } catch (e) {
                     console.error('Error parsing pending user:', e);
                 }
@@ -304,7 +351,7 @@
         }
         
         // Main login function
-        function handleLogin(email, password) {
+        async function handleLogin(email, password) {
             const errorMessage = document.getElementById('errorMessage');
             const loginButton = document.getElementById('loginButton');
             
@@ -344,11 +391,23 @@
                 }
             }
             
-            // Show error for invalid credentials
-            loginButton.textContent = originalText;
-            loginButton.disabled = false;
-            errorMessage.textContent = 'Invalid email or password';
-            errorMessage.style.display = 'block';
+            // Attempt real API login
+            try {
+                const loginData = await apiRequest('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                // Login successful - store user data and token
+                loginWithUserData(loginData.user, loginData.token);
+                
+            } catch (error) {
+                // Show error message
+                loginButton.textContent = originalText;
+                loginButton.disabled = false;
+                errorMessage.textContent = error.message || 'Invalid email or password';
+                errorMessage.style.display = 'block';
+            }
         }
         
         // Login as admin test account
