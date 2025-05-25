@@ -3,11 +3,13 @@
  * 
  * This module provides a complete JWT-based authentication system for the Myngenda app
  */
-
+import jwtAuthRoutes from './jwt-auth';
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { serveTestPage } from './test-page';
+
+// app.use('/api/auth', jwtAuthRoutes);
 
 // Create router
 const router = Router();
