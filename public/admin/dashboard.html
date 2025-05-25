@@ -4,173 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myngenda Admin Dashboard</title>
+    <!-- Dashboard Protection Script -->
+    <script>
+        (function() {
+            // Check for authentication token and user data
+            const token = localStorage.getItem('myngenda_auth_token');
+            const userData = localStorage.getItem('myngenda_user_data');
+            
+            // If no token or user data, redirect to login
+            if (!token || !userData) {
+                console.log("No authentication found. Redirecting to login...");
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                // Try to parse the user data
+                const user = JSON.parse(userData);
+                
+                // Check if user has the admin role
+                if (!user || user.role !== 'admin') {
+                    console.log("User is not an admin. Redirecting to login...");
+                    window.location.href = '/login.html';
+                    return;
+                }
+            } catch (error) {
+                console.error("Error parsing user data:", error);
+                // Clear invalid data and redirect to login
+                localStorage.removeItem('myngenda_auth_token');
+                localStorage.removeItem('myngenda_user_data');
+                window.location.href = '/login.html';
+            }
+        })();
+    </script>
     <style>
-        /* Dashboard styles */
+        /* Include CSS directly in the page to avoid external file issues */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         
-        .dashboard-container {
+        header {
+            background-color: #43a047;
+            color: white;
+            padding: 1rem;
             display: flex;
-            min-height: 100vh;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-name {
+            margin-right: 15px;
+        }
+        
+        .logout-btn {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
         }
         
         .sidebar {
             width: 250px;
-            background-color: #2e7d32;
-            color: white;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             padding: 20px 0;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        
-        .logo img {
-            max-width: 120px;
-        }
-        
-        .user-info {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        
-        .user-name {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-        
-        .menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .menu li {
-            margin-bottom: 5px;
-        }
-        
-        .menu a {
-            display: block;
+        .nav-item {
             padding: 12px 20px;
-            color: white;
+            display: flex;
+            align-items: center;
+            color: #333;
             text-decoration: none;
             transition: background-color 0.3s;
         }
         
-        .menu a:hover,
-        .menu a.active {
-            background-color: rgba(255, 255, 255, 0.1);
+        .nav-item:hover {
+            background-color: #f5f5f5;
         }
         
-        .menu-icon {
-            margin-right: 10px;
+        .nav-item.active {
+            background-color: #e8f5e9;
+            border-left: 3px solid #43a047;
+            color: #43a047;
+            font-weight: 500;
+        }
+        
+        .nav-item-icon {
             width: 20px;
             text-align: center;
-            display: inline-block;
+            margin-right: 10px;
         }
         
         .main-content {
             flex: 1;
-            padding: 30px;
+            padding: 20px;
         }
         
-        .header {
+        .dashboard-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         h1 {
             color: #333;
+            font-size: 24px;
             margin: 0;
         }
         
-        .logout-button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
+        .date {
+            color: #666;
             font-size: 14px;
-            transition: background-color 0.3s;
         }
         
-        .logout-button:hover {
-            background-color: #d32f2f;
-        }
-        
-        .dashboard-cards {
+        .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
         
-        .card {
-            background-color: white;
+        .stat-card {
+            background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
-        .card-header {
+        .stat-title {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .stat-change {
+            color: #43a047;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-change.negative {
+            color: #e53935;
+        }
+        
+        .recent-deliveries {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
         
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
+        .section-title {
             color: #333;
+            font-size: 18px;
             margin: 0;
         }
         
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #e8f5e9;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .view-all {
             color: #43a047;
-            font-size: 20px;
-        }
-        
-        .card-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .card-description {
-            color: #666;
+            text-decoration: none;
             font-size: 14px;
-        }
-        
-        .table-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
         }
         
         table {
@@ -178,312 +225,186 @@
             border-collapse: collapse;
         }
         
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-        }
-        
         th {
-            background-color: #f5f5f5;
-            font-weight: 600;
-            color: #333;
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            color: #666;
+            font-weight: 500;
         }
         
-        tr:not(:last-child) {
+        td {
+            padding: 12px 15px;
             border-bottom: 1px solid #eee;
         }
         
         .status {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 12px;
             font-weight: 500;
         }
         
-        .status.completed {
+        .status.delivered {
             background-color: #e8f5e9;
-            color: #2e7d32;
+            color: #43a047;
         }
         
-        .status.in-progress {
+        .status.in-transit {
             background-color: #fff8e1;
-            color: #ff8f00;
+            color: #ffa000;
         }
         
         .status.pending {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
-        
-        .status.cancelled {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .action-button {
             background-color: #f5f5f5;
+            color: #757575;
+        }
+        
+        .action-btn {
+            background: none;
             border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
+            color: #43a047;
             cursor: pointer;
-            transition: background-color 0.3s;
+            padding: 4px 8px;
+            font-size: 14px;
         }
         
-        .action-button:hover {
-            background-color: #e0e0e0;
-        }
-        
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .search-container {
-            position: relative;
-        }
-        
-        .search-input {
-            padding: 10px 15px 10px 35px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 250px;
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                padding: 15px;
-            }
-            
-            .main-content {
-                padding: 15px;
-            }
-            
-            .dashboard-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .search-input {
-                width: 100%;
-            }
+        .action-btn:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <script>
-        // Authentication check - run immediately before page renders
-        (function() {
-            // Check if user is authenticated
-            const userData = localStorage.getItem('myngenda_user_data');
-            const token = localStorage.getItem('myngenda_auth_token');
-            
-            if (!userData || !token) {
-                // Not authenticated - redirect to login
-                window.location.href = '/login.html';
-                return;
-            }
-            
-            // Check if user is admin
-            try {
-                const user = JSON.parse(userData);
-                if (user.role !== 'admin') {
-                    // Not an admin - redirect to homepage
-                    window.location.href = '/';
-                    return;
-                }
-            } catch (error) {
-                // Error parsing user data - redirect to login
-                window.location.href = '/login.html';
-                return;
-            }
-        })();
+    <header>
+        <div class="logo">
+            <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNjAgNDBMMTAwIDgwTDE0MCAxMjBMMTAwIDE2MEw2MCAxMjBMMjAgODBMNjAgNDAiIGZpbGw9IiM0M2EwNDciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI4Ii8+PC9zdmc+'">
+            <h2>Myngenda Admin</h2>
+        </div>
         
-        // Logout function
-        function logout() {
-            localStorage.removeItem('myngenda_user_data');
-            localStorage.removeItem('myngenda_auth_token');
-            window.location.href = '/login.html';
-        }
-    </script>
-
-    <div class="dashboard-container">
+        <div class="user-menu">
+            <span class="user-name" id="userName">Admin User</span>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+    
+    <div class="container">
         <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <img src="/icons/myngenda-icon.png" alt="Myngenda Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNjAgNDBMMTAwIDgwTDE0MCAxMjBMMTAwIDE2MEw2MCAxMjBMMjAgODBMNjAgNDAiIGZpbGw9IiM0M2EwNDciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI4Ii8+PC9zdmc+'">
-                </div>
-                <div class="user-info">
-                    <div class="user-name" id="userFullName">Admin User</div>
-                    <div id="userEmail">admin@myngenda.com</div>
-                </div>
-            </div>
-            
-            <ul class="menu">
-                <li><a href="#" class="active"><span class="menu-icon">📊</span> Dashboard</a></li>
-                <li><a href="#"><span class="menu-icon">📦</span> Packages</a></li>
-                <li><a href="#"><span class="menu-icon">🚚</span> Drivers</a></li>
-                <li><a href="#"><span class="menu-icon">👥</span> Customers</a></li>
-                <li><a href="#"><span class="menu-icon">💰</span> Payments</a></li>
-                <li><a href="#"><span class="menu-icon">📈</span> Reports</a></li>
-                <li><a href="#"><span class="menu-icon">⚙️</span> Settings</a></li>
-            </ul>
+            <a href="#" class="nav-item active">
+                <span class="nav-item-icon">📊</span>
+                Dashboard
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">📦</span>
+                Deliveries
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">🚚</span>
+                Drivers
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">👥</span>
+                Customers
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">📝</span>
+                Reports
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item-icon">⚙️</span>
+                Settings
+            </a>
         </div>
         
         <div class="main-content">
-            <div class="header">
-                <h1>Admin Dashboard</h1>
-                <button class="logout-button" onclick="logout()">Logout</button>
+            <div class="dashboard-header">
+                <h1>Dashboard</h1>
+                <div class="date" id="currentDate">May 24, 2025</div>
             </div>
             
-            <div class="dashboard-cards">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Total Packages</h2>
-                        <div class="card-icon">📦</div>
-                    </div>
-                    <div class="card-value">124</div>
-                    <div class="card-description">12% increase from last month</div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">Total Deliveries</div>
+                    <div class="stat-value">1,258</div>
+                    <div class="stat-change">↑ 12% from last month</div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Active Drivers</h2>
-                        <div class="card-icon">🚚</div>
-                    </div>
-                    <div class="card-value">48</div>
-                    <div class="card-description">5 new drivers this week</div>
+                <div class="stat-card">
+                    <div class="stat-title">Active Drivers</div>
+                    <div class="stat-value">48</div>
+                    <div class="stat-change">↑ 4% from last month</div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Total Revenue</h2>
-                        <div class="card-icon">💰</div>
-                    </div>
-                    <div class="card-value">$9,842</div>
-                    <div class="card-description">18% increase from last month</div>
+                <div class="stat-card">
+                    <div class="stat-title">Average Delivery Time</div>
+                    <div class="stat-value">28 min</div>
+                    <div class="stat-change negative">↓ 5% from last month</div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Customers</h2>
-                        <div class="card-icon">👥</div>
-                    </div>
-                    <div class="card-value">285</div>
-                    <div class="card-description">24 new customers this month</div>
+                <div class="stat-card">
+                    <div class="stat-title">Customer Satisfaction</div>
+                    <div class="stat-value">4.8/5</div>
+                    <div class="stat-change">↑ 0.2 from last month</div>
                 </div>
             </div>
             
-            <div class="table-container">
-                <div class="table-header">
-                    <h2>Recent Deliveries</h2>
-                    <div class="search-container">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" class="search-input" placeholder="Search deliveries...">
-                    </div>
+            <div class="recent-deliveries">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Deliveries</h2>
+                    <a href="#" class="view-all">View All</a>
                 </div>
                 
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Order ID</th>
                             <th>Customer</th>
-                            <th>Driver</th>
                             <th>Destination</th>
+                            <th>Driver</th>
                             <th>Status</th>
-                            <th>Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>#12345</td>
-                            <td>John Smith</td>
-                            <td>David Williams</td>
-                            <td>Nairobi, Kenya</td>
-                            <td><span class="status completed">Completed</span></td>
-                            <td>May 23, 2025</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-button">View</button>
-                                    <button class="action-button">Edit</button>
-                                </div>
-                            </td>
+                            <td>#ORD-5689</td>
+                            <td>John Doe</td>
+                            <td>123 Main St, Nairobi</td>
+                            <td>Samuel Kimani</td>
+                            <td><span class="status delivered">Delivered</span></td>
+                            <td><button class="action-btn">View Details</button></td>
                         </tr>
                         <tr>
-                            <td>#12344</td>
-                            <td>Sarah Johnson</td>
-                            <td>Michael Brown</td>
-                            <td>Lagos, Nigeria</td>
-                            <td><span class="status in-progress">In Progress</span></td>
-                            <td>May 23, 2025</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-button">View</button>
-                                    <button class="action-button">Edit</button>
-                                </div>
-                            </td>
+                            <td>#ORD-5688</td>
+                            <td>Jane Smith</td>
+                            <td>456 Park Ave, Mombasa</td>
+                            <td>Lucy Wanjiku</td>
+                            <td><span class="status in-transit">In Transit</span></td>
+                            <td><button class="action-btn">View Details</button></td>
                         </tr>
                         <tr>
-                            <td>#12343</td>
-                            <td>Emmanuel Osei</td>
-                            <td>Samuel Mensah</td>
-                            <td>Accra, Ghana</td>
+                            <td>#ORD-5687</td>
+                            <td>Robert Johnson</td>
+                            <td>789 Oak Rd, Kisumu</td>
+                            <td>David Ochieng</td>
+                            <td><span class="status in-transit">In Transit</span></td>
+                            <td><button class="action-btn">View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-5686</td>
+                            <td>Mary Williams</td>
+                            <td>321 Pine St, Nakuru</td>
+                            <td>Grace Muthoni</td>
                             <td><span class="status pending">Pending</span></td>
-                            <td>May 22, 2025</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-button">View</button>
-                                    <button class="action-button">Edit</button>
-                                </div>
-                            </td>
+                            <td><button class="action-btn">View Details</button></td>
                         </tr>
                         <tr>
-                            <td>#12342</td>
-                            <td>Fatima Ahmed</td>
-                            <td>Abdoulaye Diallo</td>
-                            <td>Dakar, Senegal</td>
-                            <td><span class="status cancelled">Cancelled</span></td>
-                            <td>May 22, 2025</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-button">View</button>
-                                    <button class="action-button">Edit</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#12341</td>
-                            <td>Rachel Mutua</td>
-                            <td>Daniel Kimani</td>
-                            <td>Mombasa, Kenya</td>
-                            <td><span class="status completed">Completed</span></td>
-                            <td>May 21, 2025</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-button">View</button>
-                                    <button class="action-button">Edit</button>
-                                </div>
-                            </td>
+                            <td>#ORD-5685</td>
+                            <td>Michael Brown</td>
+                            <td>654 Cedar Ln, Eldoret</td>
+                            <td>James Kiprop</td>
+                            <td><span class="status delivered">Delivered</span></td>
+                            <td><button class="action-btn">View Details</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -492,18 +413,33 @@
     </div>
     
     <script>
-        // Load user info
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const userData = localStorage.getItem('myngenda_user_data');
-                if (userData) {
-                    const user = JSON.parse(userData);
-                    document.getElementById('userFullName').textContent = user.firstName + ' ' + user.lastName;
-                    document.getElementById('userEmail').textContent = user.email;
-                }
-            } catch (error) {
-                console.error('Error loading user data:', error);
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Display user name from localStorage
+        try {
+            const userData = localStorage.getItem('myngenda_user_data');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('userName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User';
             }
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+        }
+        
+        // Handle logout
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            // Clear auth data
+            localStorage.removeItem('myngenda_auth_token');
+            localStorage.removeItem('myngenda_user_data');
+            
+            // Redirect to login page
+            window.location.href = '/login.html';
         });
     </script>
 </body>
