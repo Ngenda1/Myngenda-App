@@ -1,4 +1,6 @@
-# Netlify redirects file
+# Route auth pages to standalone auth
+/login    /standalone-auth.html    200
+/register /standalone-auth.html    200
 
 # API proxy to Replit backend
 /api/*  https://myngenda.replit.app/api/:splat  200
